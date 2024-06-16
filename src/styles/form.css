@@ -1,0 +1,13 @@
+.form-group-inline {
+  display: flex;
+  align-items: center;
+}
+
+.input-amount {
+  flex: 0 0 75%;
+  margin-right: .5rem;
+}
+
+.select-currency {
+  flex: 0 0 20%;
+}
