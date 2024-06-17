@@ -1,13 +1,11 @@
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
-import { useAppContext } from '../../Context';
+import { Action } from '../../utilities/actions';
 import { BuyFormProps } from '../../utilities/interfaces';
-import { ethers } from 'ethers';
 
 
-export default function BuyForm ({ buyType, handleSubmit, handleChange, balance, DNABalance, currentSupply } : BuyFormProps) {
+export default function BuyForm ({ buyType, handleSubmit, handleChange, DNABalance, currentSupply } : BuyFormProps) {
   const [inputValue, setInputValue] = useState<number>(1);
-  const appContext = useAppContext();
 
   const change = (event: any) => {
     const value = handleChange(event.target.value, buyType);
@@ -22,29 +20,40 @@ export default function BuyForm ({ buyType, handleSubmit, handleChange, balance,
   return (
     <Box component="form" onSubmit={submit} sx={{ p: 2 }}>
       <Typography variant="body1" gutterBottom>
-        {buyType === "DNA" && 
+        {buyType === Action.BUY_DNA && 
         "Scegli una quantità in wei da trasformare in DNA!"
         }
-        {buyType === "Shares" && 
+        {buyType === Action.BUY_SHARES && 
         "Scegli una quantità in DNA da trasformare in Shares!"
         }
-        {buyType === "Approve" && 
+        {buyType === Action.APPROVE_DNA && 
         "Scegli una quantità in DNA da approvare per l'acquisto di Shares!"
+        }
+        {buyType === Action.UPDATE_PRICE && 
+        "Scegli il nuovo prezzo per i DNA Token"
         }
       </Typography>
       <TextField
         type="number"
-        placeholder={buyType === "DNA" ? 
+        placeholder={buyType === Action.BUY_DNA ? 
           "Max " + currentSupply + " DNA" : 
-          buyType === "Shares" ? 
-          "Max " + appContext.DNABalance + " Shares" : 
-          "Max " + appContext.DNABalance + " DNA"}
+          buyType === Action.BUY_SHARES ? 
+          "Max " + DNABalance + " Shares" : 
+          buyType === Action.APPROVE_DNA ?
+          "Max " + DNABalance + " DNA" : 
+          buyType === Action.UPDATE_PRICE ?
+          "default 1 wei" : ""}
         value={inputValue}
         onChange={change}
         fullWidth
         margin="normal"
         id="range-value"
-        label="Quantità (in DNA)"
+        label={buyType === Action.BUY_DNA ? 
+          "Quantità (in wei)" : 
+          buyType === Action.BUY_SHARES || buyType === Action.APPROVE_DNA ? 
+          "Quantità (in DNA)" : 
+          buyType === Action.UPDATE_PRICE ?
+          "Quantità (in wei)" : ""}
       />
       <Box mt={2}>
         <Button type="submit" variant="contained" color="primary" fullWidth>

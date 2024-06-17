@@ -1,45 +1,30 @@
 import { Box, Button, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
 import { useAppContext } from "../../Context";
-import "../../styles/error.css";
 import { buyShares } from "../../utilities/DAOBridge";
-import { approveDNAToken, buyDNAToken, readAllowance, readCurrentSupply } from "../../utilities/DNABridge";
+import { approveDNAToken, buyDNAToken } from "../../utilities/DNABridge";
 import { ErrorMessage, swalError, transformMessage } from '../../utilities/Error';
+import { Action } from "../../utilities/actions";
+import { formatWeiBalance } from "../../utilities/helper";
 import { ErrorProps } from "../../utilities/interfaces";
 import Loader from "../Loader";
 import BuyForm from "../forms/BuyForm";
-import withReactContent from "sweetalert2-react-content";
-import { ethers } from "ethers";
-import { formatWeiBalance } from "../../utilities/helper";
 
 export default function NewMemberView({ errorMessage }: ErrorProps) {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
-	const [currentSupply, setCurrentSupply] = useState<number>(0);
 	const appContext = useAppContext();
 	const MySwal = withReactContent(Swal);
-
-	useEffect(() => {
-		getCurrentSupply();
-	})
-
-	async function getCurrentSupply() {
-		try {
-			const supply = await readCurrentSupply();
-			setCurrentSupply(supply ? supply : 0);
-		} catch (error) {
-			console.log("Error while reading contract data");
-		}
-	}
 
 	async function handleSubmit(amount: number, buyType: string) {
 		let success;
 		setIsLoading(true);
-		if (buyType === "DNA") {
+		if (buyType === Action.BUY_DNA) {
 			success = await buyDNAToken(amount);
-		} else if (buyType === "Shares") {
+		} else if (buyType === Action.BUY_SHARES) {
 			success = Boolean(await buyShares(amount));
-		} else if (buyType === "Approve") {
+		} else if (buyType === Action.APPROVE_DNA) {
 			success = await approveDNAToken(amount);
 		}
 		setIsLoading(false);
@@ -53,23 +38,27 @@ export default function NewMemberView({ errorMessage }: ErrorProps) {
 				confirmButtonColor: "#3085d6",
 			});
 		} else {
-			console.log("Errore durante l'operazione di acquisto/approvazione DNA o Shares");
+			console.log("Error during operation : " + buyType);
 		}
 	}
 
 	function handleChange(amount: number, buyType: string) {
-		const { balance, DNABalance, allowance } = appContext;
+		const { balance, DNABalance, allowance, currentSupply } = appContext;
 		const weiBalance = formatWeiBalance(balance);
 
-		if (buyType === "Shares" && amount >= DNABalance) {
+		if (amount < 0) {
+			return 0;
+		}
+
+		if (buyType === Action.BUY_SHARES && amount >= DNABalance) {
 			return appContext.DNABalance;
-		} else if (buyType === "DNA" && amount >= weiBalance && weiBalance <= currentSupply) {
+		} else if (buyType === Action.BUY_DNA && amount >= weiBalance && weiBalance <= currentSupply) {
 			return weiBalance;
-		} else if (buyType === "DNA" && amount >= currentSupply && weiBalance >= currentSupply) {
+		} else if (buyType === Action.BUY_DNA && amount >= currentSupply && weiBalance >= currentSupply) {
 			return currentSupply;
-		} else if (buyType === "Approve" && amount >= DNABalance) {
+		} else if (buyType === Action.APPROVE_DNA && amount >= DNABalance) {
 			return DNABalance;
-		} else if (buyType === "Shares" && amount >= allowance){
+		} else if (buyType === Action.BUY_SHARES && amount >= allowance) {
 			return allowance;
 		} else {
 			return amount;
@@ -79,9 +68,31 @@ export default function NewMemberView({ errorMessage }: ErrorProps) {
 	function buyDNA() {
 		if (appContext.balance > 0) {
 			MySwal.fire({
-				title: "Acquisto DNA",
+				title: "Acquisto DNA Token ",
 				icon: "question",
-				html: <BuyForm handleSubmit={handleSubmit} handleChange={handleChange} buyType="DNA" currentSupply={currentSupply} balance={formatWeiBalance(appContext.balance)} />,
+				html: <BuyForm
+					buyType={Action.BUY_DNA}
+					handleSubmit={handleSubmit}
+					handleChange={handleChange}
+					currentSupply={appContext.currentSupply} />,
+				showConfirmButton: false,
+				showCloseButton: true,
+			})
+		} else {
+			swalError(ErrorMessage.IF);
+		}
+	}
+
+	function approveDNA() {
+		if (appContext.DNABalance > 0) {
+			MySwal.fire({
+				title: "Approva DNA Token",
+				icon: "question",
+				html: <BuyForm
+					buyType={Action.APPROVE_DNA}
+					handleSubmit={handleSubmit}
+					handleChange={handleChange}
+					DNABalance={appContext.allowance} />,
 				showConfirmButton: false,
 				showCloseButton: true,
 			})
@@ -95,21 +106,11 @@ export default function NewMemberView({ errorMessage }: ErrorProps) {
 			MySwal.fire({
 				title: "Acquista DNA Shares",
 				icon: "question",
-				html: <BuyForm handleSubmit={handleSubmit} handleChange={handleChange} buyType="Shares" DNABalance={appContext.DNABalance} />,
-				showConfirmButton: false,
-				showCloseButton: true,
-			})
-		} else {
-			swalError(ErrorMessage.IF);
-		}
-	}
-
-	function approveDNA() {
-		if (appContext.DNABalance > 0) {
-			MySwal.fire({
-				title: "Acquista DNA Shares",
-				icon: "question",
-				html: <BuyForm handleSubmit={handleSubmit} handleChange={handleChange} buyType="Approve" DNABalance={appContext.allowance} />,
+				html: <BuyForm
+					buyType={Action.BUY_SHARES}
+					handleSubmit={handleSubmit}
+					handleChange={handleChange}
+					DNABalance={appContext.DNABalance} />,
 				showConfirmButton: false,
 				showCloseButton: true,
 			})
@@ -153,7 +154,7 @@ export default function NewMemberView({ errorMessage }: ErrorProps) {
 					style={{ width: "15%", borderRadius: "4rem", marginTop: "2rem" }}>
 					ACQUISTA DNA
 				</Button>
-				<Typography fontSize={"small"}>Rimangono {currentSupply} DNA disponibili</Typography>
+				<Typography fontSize={"small"}>Rimangono {appContext.currentSupply} DNA disponibili</Typography>
 
 				{errorMessage === ErrorMessage.NOT_MEMBER &&
 					<>
@@ -170,8 +171,12 @@ export default function NewMemberView({ errorMessage }: ErrorProps) {
 							style={{ width: "15%", borderRadius: "4rem", marginTop: "2rem" }}>
 							APPROVA DNA
 						</Button>
+						<Typography fontSize={"small"}>Ricorda che ogni approvazione sovrascrive la precedente</Typography>
 						{appContext.DNABalance === appContext.allowance &&
 							<Typography fontSize={"small"}>Tutti i DNA Token sono stati approvati all'acquisto degli shares</Typography>
+						}
+						{appContext.DNABalance > appContext.allowance &&
+							<Typography fontSize={"small"}>Puoi approvare ancora {appContext.DNABalance - appContext.allowance} DNA</Typography>
 						}
 						<Button
 							onClick={buyDNAShares}

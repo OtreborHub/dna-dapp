@@ -1,11 +1,116 @@
 export const DNADAO_ABI =
 [
 	{
-		"inputs": [],
-		"name": "activeSale",
-		"outputs": [],
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_tokenAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_pricePerShare",
+				"type": "uint256"
+			}
+		],
 		"stateMutability": "nonpayable",
-		"type": "function"
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "buyer",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "BuyOrder",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "addedRemoved",
+				"type": "bool"
+			}
+		],
+		"name": "Delegation",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "title",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "approved",
+				"type": "bool"
+			}
+		],
+		"name": "ExecutedProposal",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "title",
+				"type": "string"
+			}
+		],
+		"name": "NewProposal",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "enabled",
+				"type": "bool"
+			}
+		],
+		"name": "SaleState",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "member",
+				"type": "address"
+			}
+		],
+		"name": "Vote",
+		"type": "event"
 	},
 	{
 		"inputs": [
@@ -68,65 +173,6 @@ export const DNADAO_ABI =
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "endSale",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "proposalAddr",
-				"type": "address"
-			}
-		],
-		"name": "executeProposal",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "_tokenAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_pricePerShare",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "nonpayable",
-		"type": "constructor"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "proposalAddr",
-				"type": "address"
-			},
-			{
-				"internalType": "bool",
-				"name": "support",
-				"type": "bool"
-			},
-			{
-				"internalType": "bool",
-				"name": "abstain",
-				"type": "bool"
-			}
-		],
-		"name": "vote",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"inputs": [
 			{
 				"internalType": "address",
@@ -148,6 +194,33 @@ export const DNADAO_ABI =
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "disableSale",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "enableSale",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "proposalAddr",
+				"type": "address"
+			}
+		],
+		"name": "executeProposal",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -189,6 +262,11 @@ export const DNADAO_ABI =
 					{
 						"internalType": "bool",
 						"name": "executed",
+						"type": "bool"
+					},
+					{
+						"internalType": "bool",
+						"name": "approved",
 						"type": "bool"
 					},
 					{
@@ -295,6 +373,11 @@ export const DNADAO_ABI =
 				"type": "bool"
 			},
 			{
+				"internalType": "bool",
+				"name": "approved",
+				"type": "bool"
+			},
+			{
 				"internalType": "address",
 				"name": "recipient",
 				"type": "address"
@@ -309,8 +392,21 @@ export const DNADAO_ABI =
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "revokeDelegation",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [],
-		"name": "saleActive",
+		"name": "saleEnabled",
 		"outputs": [
 			{
 				"internalType": "bool",
@@ -351,6 +447,29 @@ export const DNADAO_ABI =
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "proposalAddr",
+				"type": "address"
+			},
+			{
+				"internalType": "bool",
+				"name": "support",
+				"type": "bool"
+			},
+			{
+				"internalType": "bool",
+				"name": "abstain",
+				"type": "bool"
+			}
+		],
+		"name": "voteProposal",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{

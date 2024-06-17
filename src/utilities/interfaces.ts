@@ -1,4 +1,5 @@
 import { ErrorMessage } from "./Error";
+import { Action } from "./actions";
 
 interface NavbarProps {
     connect: () => void;
@@ -19,12 +20,16 @@ interface ProposalFormProps {
 }
 
 interface BuyFormProps {
-    buyType: string;
-    handleSubmit: (amount: number, buyTime: string) => void;
-    handleChange: (amount: number, buyTime: string) => number;
-    balance?: number;
+    buyType: Action;
+    handleSubmit: (amount: number, buyTipe: string) => void;
+    handleChange: (amount: number, buyTipe: string) => number;
     DNABalance?: number;
     currentSupply?: number;
+}
+
+interface DelegationFormProps {
+    delegationType: string;
+    handleSubmitDelegation: (memberAddress: string, delegationType: string) => void;
 }
 
 interface Proposal {
@@ -35,6 +40,7 @@ interface Proposal {
     voteCountCon: number;
     voteCountAbstain: number;
     executed: boolean;
+    approved: boolean;
     recipient: string;
     amount: number;
 }
@@ -48,4 +54,4 @@ interface LoaderProps {
     loading: boolean
 }
 
-export type { NavbarProps, ErrorProps, ProposalProps, Proposal, CustomSelectProps, ProposalFormProps, BuyFormProps, LoaderProps }
+export type { NavbarProps, ErrorProps, ProposalProps, Proposal, CustomSelectProps, ProposalFormProps, BuyFormProps, LoaderProps, DelegationFormProps }

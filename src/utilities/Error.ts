@@ -6,9 +6,10 @@ export enum ErrorMessage {
     //WALLET FRONTEND ERRORS
     WALLET_ERROR="Benvenuto! ]Per favore connetti il tuo wallet sulla rete Sepolia Testnet per accedere all'applicativo",
     NO_DNA_TOKEN = "Il tuo portafoglio non contiene DNA.]Acquista Token DNA per avere accesso alla governance!",
-    NOT_MEMBER = "Ancora un paio di step: il tuo portafoglio non appartiene al registro dei membri.]Acquista parte delle azioni DnA ed inizia la tua avventura con noi!",
-    APPROVE_ISTRUCTION = "Un'ultimo passaggio: Scusaci per l'iter ma teniamo a proteggere i tuoi DNA.]Abilita DNA Administration ad usare i tuoi DNA, successivamente puoi spenderli per acquistare Shares.",
-    RE="Impossibile accedere alla risorsa selezionata",
+    NOT_MEMBER = "Il tuo portafoglio non appartiene al registro dei membri.]Acquista parte delle shares DnA ed inizia la tua avventura con noi!",
+    APPROVE_ISTRUCTION = "Per prima cosa approva una quantità di DNA Token che DNA Administration potrà usare per l'acquisto degli share,]successivamente puoi spenderli per acquistare Shares.",
+    
+    ALREADY_VOTED="Already voted",
 
     //GENERIC ERRORS
     RD="Error reading contract data",
@@ -18,19 +19,21 @@ export enum ErrorMessage {
 
     // Contract Messages
     IF="Insufficient funds",
-    SU="Sender unauthorized",
+    IA="Insufficient allowance",
 
-    AP="Admin already present",
+    SENDER_NOT_OWNER="Sender must be the owner",
+    SENDER_NOT_MEMBER="Sender must be a member",
+    ADDRESS_NOT_MEMBER="Address not owned by a member",
 
-    CNT="Customer not found",
-    SAS="Customer already has a subscription",
-    SNS="Customer has no active subscription",
+    SALE_CLOSED="Sale is closed",
 
-    MNT="Magazine not found",
-    MAP="Magazine already present",
-    MAR="Magazine already released",
-    MNR="Magazine not released",
-    MAO="Magazine already owned",
+    SALE_ALREADY_DISABLED="Sale already disabled",
+    SALE_ALREADY_ENABLED="Sale already enabled",
+    EMPTY_TITLE="Empty title",
+    EMPTY_DESC="Empty description",
+    PROP_EXECUTED="Proposal already executed",
+    NOT_ENOGHT_VOTES="Not enoght votes",
+    PROP_TRANSFER="Token transfer failed",
 
 }
 
@@ -47,7 +50,7 @@ export function swalError(errorMessage: ErrorMessage, action?: Action, error?: a
     if(error && error.info && error.info.error && error.info.error.code === 4001){
         return;
     } else
-    if(error && error.shortMessage && error.shortMessage.includes("execution reverted")){
+    if(error && error.shortMessage && error.shortMessage.includes("execution reverted:")){
         shortMessage = error.shortMessage.split(":")[1].trim().replace("\"", "").slice(0, -1);
     } else
     if(error && error.code){
@@ -64,8 +67,14 @@ export function swalError(errorMessage: ErrorMessage, action?: Action, error?: a
             break;
 
         case ErrorMessage.TR:
-            title = "Qualcosa è andato storto!";
-            if(action){
+            if (action && action === Action.EXECUTE_PROP) {
+                title = "Esecuzione della proposta non riuscita";
+                text = "Si prega di riprovare più tardi."
+            } else if (action && (action === Action.DELEGATE_MEMBER || action === Action.REVOKE_DELEGATE)) {
+                title = "Modifica delle deleghe non riuscita";
+                text = "Si prega di riprovare più tardi."
+            } else if(action){
+                title = "Qualcosa è andato storto!";
                 text = "Si è verificato un errore durante l'operazione di " + action + ".\nRiprova più tardi.";
             } else {
                 text = "Si è verificato un errore generico.\nRiprova più tardi."
@@ -74,88 +83,70 @@ export function swalError(errorMessage: ErrorMessage, action?: Action, error?: a
 
         case ErrorMessage.IF:
             title = "Saldo Insufficiente!";
-            // if(action && (action === Action.WITHDRAW || action === Action.SPLIT_PROFIT)){
-            //     text = "Verifica che il saldo del contratto sia sufficiente per il prelievo";
             if (action && action === Action.BUY_SHARES) {
-                text = "Verifica che il tuo saldo sia sufficiente, o rivedi la quantità di shares inserite.";
+                text = "Verifica che il tuo saldo sia sufficiente, o rivedi la quantità di Shares inserite.";
             } else if (action && action === Action.BUY_DNA){
                 text = "Verifica che il tuo saldo sia sufficiente, o rivedi la quantità di wei inserita";
             }
-            // } else if (action && action === Action.DONATION) {
-            //     text = "Si è verificato un errore durante l'invio della donazione.";
-            // } else if (action && action === Action.MIN_DONATION) {
-            //     text = "Attenzione, il tuo bilancio è inferiore al valore minimo di donazione.";
-            // }
             break;
 
-        case ErrorMessage.SU:
+        case ErrorMessage.IA:
+            title = "Saldo approvato insufficiente!";
+            text = "Verifica di aver prima approvato i DNA che stai trasformando in Shares!";
+            break;
+
+        case ErrorMessage.SENDER_NOT_OWNER:
+        case ErrorMessage.SENDER_NOT_MEMBER:
             title = "Utente non autorizzato alla funzionalità";
             break;
 
-        case ErrorMessage.AP:
-            title = "Indirizzo già presente nella lista degli amministratori";
+
+        case ErrorMessage.SALE_CLOSED:
+            title = "Vendita non abilitata";
+            text = "Ci dispiace, la vendita degli Shares DNA al momento è disabilitata."
             break;
 
-        case ErrorMessage.CNT:
-            title = "Indirizzo cliente non trovato";
+        case ErrorMessage.SALE_ALREADY_ENABLED:
+            title = "La vendita di Share DNA è già abilitata"
             break;
 
-        case ErrorMessage.SAS:
-            title = "Utente già abbonato"
+        case ErrorMessage.SALE_ALREADY_DISABLED:
+            title = "La vendita di Share DNA è già abilitata";
             break;
 
-        case ErrorMessage.SNS:
-            title = "Nessun abbonamento attivo per l'utente"
+        case ErrorMessage.EMPTY_TITLE:
+            title = "Titolo vuoto: scegli il titolo della tua proposta.";
             break;
 
-        case ErrorMessage.MNT:
-            title = "Magazine non trovato";
+        case ErrorMessage.EMPTY_DESC:
+            title = "Descrizione vuota: scegli una descrizione per la tua proposta";
             break;
 
-        case ErrorMessage.MAP:
-            title = "Magazine già esistente";
+        case ErrorMessage.PROP_EXECUTED:
+            title = "Proposta già eseguita";
             break;
 
-        case ErrorMessage.MAR:
-            title = "Magazine già rilasciato";
-            break;
-
-        case ErrorMessage.MNR:
-            title = "Magazine non rilasciato";
-            break;
-
-        case ErrorMessage.MAO: 
-            title = "Magazine già acquistato";
-            text = "Puoi consultare i tuoi magazine dal Menu Ruolo in alto a sinistra";
+        case ErrorMessage.NOT_ENOGHT_VOTES: 
+            title = "Voti non sufficenti per l'esecuzione della proposta";
             break;
 
         case ErrorMessage.IO:
             title = "Parametri di input non validi";
-            // if(action && action === Action.SRC_ADDR_PROP){
-            //     title = "Seleziona un criterio di ricerca";
-            //     text = "Ricontrolla l'indirizzo inserito e assicurati che sia un indirizzo valido";
-            if (action && action === Action.EXECUTE_PROP) {
-                title = "Esecuzione della proposta non riuscita";
-            }
+            
             break;
 
-        case ErrorMessage.FE: 
-            title = "Errore durante l'interazione con la base dati";
-            if(action){
-                text = "Si è verificato un errore durante l'operazione di " + action + ".\nRiprova più tardi.";
-            }
+        case ErrorMessage.PROP_TRANSFER: 
+            title = "Errore durante il trasferimento di ether nell'esecuzione della proposta";
             break;
 
-        case ErrorMessage.RE:
-            title = errorMessage;
-            if(action){
-                text = "Si è verificato un errore durante l'operazione di " + action + ".\nRiprova più tardi.";
-            }
-
+        case ErrorMessage.ALREADY_VOTED:
+            title = "Impossibile votare";
+            text = "Hai già votato questa proposta o il membro che hai delegato ha votato per te.";
             break;
         
         default: 
             title = "Qualcosa è andato storto!";
+            text = "Si prega di riprovare più tardi";
     }
 
     if(title || text){

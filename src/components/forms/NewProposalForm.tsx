@@ -101,8 +101,7 @@ export default function NewProposalForm ({ handleSubmit }: ProposalFormProps) {
               value={formData.currency}
               onChange={handleChange}
             >
-              <MenuItem value="wei">wei</MenuItem>
-              <MenuItem value="ETH">ETH</MenuItem>
+            <MenuItem value="wei">DNA</MenuItem>
             </Select>
           </FormControl>
         </Grid>

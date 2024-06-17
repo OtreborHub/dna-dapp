@@ -1,16 +1,22 @@
 export enum Action {
   
   RD_DATA="Lettura dati dal contratto",
-  RD_PROP = "Ricerca proposta",
+
   ADD_PROP="Creazione proposta",
+  RD_ALL_PROP="Lettura proposte",
   EXECUTE_PROP="Esecuzione proposta",
-  RD_ALL_PROP="Ricerca proposte",
-  // SRC_ADDR_PROP="Ricerca proposta tramite indirizzo",
+  VOTE_PROP="Voto",
+
   DELEGATE_MEMBER="Delega Membro",
+  REVOKE_DELEGATE="Revoca delega",
+
   ENABLE_SALE="Abilitazione vendita shares",
   DISABLE_SALE="Disabilitazione vendita shares",
-  BUY_SHARES="Acquisto azioni",
-  VOTE="Voto",
-  MIN_DONATION="Minima donazione",
-  BUY_DNA="Acquisto DNA"
+
+  BUY_DNA="Acquisto DNA",
+  APPROVE_DNA="Approva DNA",
+  BUY_SHARES="Acquisto Shares",
+
+  UPDATE_PRICE="Aggiornamento prezzo"
+
 }

@@ -5,21 +5,21 @@ import { MenuItem as BaseMenuItem, menuItemClasses } from '@mui/base/MenuItem';
 import { styled } from '@mui/system';
 import { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
 import { useAppContext } from '../Context';
-import { activeSale, buyShares, endSale } from '../utilities/DAOBridge';
-import { approveDNAToken, buyDNAToken, readAllowance, readCurrentSupply } from '../utilities/DNABridge';
+import { buyShares, delegateVote, disableSale, enableSale, revokeMemberDelegation } from '../utilities/DAOBridge';
+import { approveDNAToken, buyDNAToken, readCurrentSupply, updateTokenPrice } from '../utilities/DNABridge';
 import { ErrorMessage, swalError } from '../utilities/Error';
 import { Role } from '../utilities/Role';
 import { Action } from '../utilities/actions';
+import { formatWeiBalance } from '../utilities/helper';
 import { NavbarProps } from '../utilities/interfaces';
 import Loader from './Loader';
-import withReactContent from 'sweetalert2-react-content';
 import BuyForm from './forms/BuyForm';
-import { formatWeiBalance } from '../utilities/helper';
+import DelegationForm from './forms/DelegationForm';
 
 export default function DropdownMenu({ connect: connectWallet }: NavbarProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [hasDelegation, setHasDelegation] = useState<boolean>(false);
   const [currentSupply, setCurrentSupply] = useState<number>(0);
   const appContext = useAppContext();
   const MySwal = withReactContent(Swal);
@@ -40,10 +40,11 @@ export default function DropdownMenu({ connect: connectWallet }: NavbarProps) {
     
   async function endSharesSale(){
     try {
-      const success = await endSale();
+      const success = await disableSale();
       if(success){
         Swal.fire({
-          title: "Periodo di vendita terminato",
+          title: "Richiesta di disabilitazione vendita Shares",
+          text: "La vendita degli Shares sarà disabilitata tra qualche secondo. Premi OK per continuare.",
           icon: "success",
           confirmButtonColor: "#3085d6"
         })
@@ -55,10 +56,11 @@ export default function DropdownMenu({ connect: connectWallet }: NavbarProps) {
 
   async function activeSharesSale(){
     try {
-      const success = await activeSale();
+      const success = await enableSale();
       if(success){
         Swal.fire({
-          title: "Periodo di vendita terminato",
+          title: "Richiesta di abilitazione vendita Shares",
+          text: "La vendita degli Shares sarà disponibile tra qualche secondo. Premi OK per continuare.",
           icon: "success",
           confirmButtonColor: "#3085d6"
         })
@@ -69,124 +71,126 @@ export default function DropdownMenu({ connect: connectWallet }: NavbarProps) {
   }
 
 
-  function delegateMember() {
-  //   let minWithdraw = 0.000001;
-  //   let balance = parseFloat(ethers.formatEther(appContext.contractBalance));
-  //   if (balance === 0 || balance < minWithdraw) {
-  //     swalError(ErrorMessage.IF, Action.SPLIT_PROFIT);
-  //   }
-  //   else {
-  //     Swal.fire({
-  //       title: "Dividi Profitto",
-  //       text: "Proseguendo dividerai il bilancio del contratto con i tuoi collaboratori, sei sicuro?",
-  //       confirmButtonColor: "#3085d6",
-  //       showCancelButton: true,
-  //       showCloseButton: true
-  //     }).then(async (result) => {
-  //       if (result.isConfirmed) {
-  //         setIsLoading(true);
-  //         const success = await splitProfit();
-  //         setIsLoading(false);
-  //         if(success) {
-  //           Swal.fire({
-  //             title: "Split profit avvenuto con successo!",
-  //             text: "",
-  //             icon: "success",
-  //             confirmButtonColor: "#3085d6"
-  //           });
-  //         } else {
-  //           console.log("Errore durante l'azione di splitProfit");
-  //         }
-  //       }
-  //     })
-  //   }
-  }
-
-  function changeDelegateMember() {
-    // Swal.fire({
-    //   title: "Aggiungi admin",
-    //   input: "text",
-    //   text: "Inserisci l'indirizzo del wallet da aggiungere come admin",
-    //   inputPlaceholder: "Address 0x00...",
-    //   confirmButtonColor: "#3085d6",
-    //   showCancelButton: true,
-    //   showCloseButton: true
-    // }).then(async (result) => {
-    //   if (result.isConfirmed) {
-    //     if(addressValidation(result.value)){
-    //       setIsLoading(true);
-    //       const success = await addAdministrator(result.value);
-    //       setIsLoading(false);
-    //       if(success){
-    //         Swal.fire({
-    //           title: "Admin aggiunto con successo!", 
-    //           text: "", 
-    //           icon: "success",
-    //           confirmButtonColor: "#3085d6"
-    //         });
-    //       } else {
-    //         console.log("Errore durante l'azione di aggiunta admin");
-    //       }
-    //     } else {
-    //       swalError(ErrorMessage.IO, Action.ADD_ADMIN);
-    //     }
-    //   } 
-    // })
+  function delegateVoteToMember() {
+    MySwal.fire({
+      title: "Delega Membro",
+      icon: "question",
+      html: <DelegationForm 
+        delegationType={Action.DELEGATE_MEMBER} 
+        handleSubmitDelegation={handleSubmitDelegation}/>,
+      showConfirmButton: false,
+      showCloseButton: true,
+    })
   }
 
   function revokeDelegation() {
-    // if (appContext.balance > 0) {
-    //   Swal.fire({
-    //     title: "Aspetta...",
-    //     text: "Sei sicuro di voler revocare l'abbonamento? :(",
-    //     icon: "question",
-    //     confirmButtonColor: "#3085d6",
-    //     showCancelButton: true,
-    //     showCloseButton: true
-    //   }).then(async (result) => {
-    //     if (result.isConfirmed) {
-    //       setIsLoading(true);
-    //       const success = await revokeSubscription();
-    //       setIsLoading(false);
-    //       if(success){
-    //         Swal.fire({
-    //           title: "A presto!",
-    //           text: "La revoca dell'abbonamento è stata effettuata.",
-    //           icon: "success",
-    //           confirmButtonColor: "#3085d6"
-    //         });
-    //       } else {
-    //         console.log("Errore durante l'azione di revoca abbonamento");
-    //       }
-    //     }
-    //   })
-    // } else {
-    //   swalError(ErrorMessage.IF);
-    // }
+    MySwal.fire({
+      title: "Revoca Delega Membro",
+      icon: "question",
+      html: <DelegationForm 
+        delegationType={Action.REVOKE_DELEGATE} 
+        handleSubmitDelegation={handleSubmitDelegation}/>,
+      showConfirmButton: false,
+      showCloseButton: true,
+    })
+  }
+
+  function buyDNA() {
+		if (appContext.balance > 0) {
+			MySwal.fire({
+				title: "Acquista DNA Token",
+				icon: "question",
+				html: <BuyForm 
+          buyType={Action.BUY_DNA} 
+          handleSubmit={handleSubmit} 
+          handleChange={handleChange} 
+          currentSupply={currentSupply} />,
+				showConfirmButton: false,
+				showCloseButton: true,
+			})
+		} else {
+			swalError(ErrorMessage.IF, Action.BUY_DNA);
+		}
+	}
+
+	function approveDNA() {
+		if (appContext.DNABalance > 0) {
+			MySwal.fire({
+				title: "Approva DNA Token",
+				icon: "question",
+				html: <BuyForm 
+          buyType={Action.APPROVE_DNA} 
+          handleSubmit={handleSubmit} 
+          handleChange={handleChange} 
+          DNABalance={appContext.allowance} />,
+				showConfirmButton: false,
+				showCloseButton: true,
+			})
+		} else {
+			swalError(ErrorMessage.IF, Action.APPROVE_DNA);
+		}
+	}
+
+  function buyDNAShares() {
+		if (appContext.allowance > 0) {
+			MySwal.fire({
+				title: "Acquista DNA Shares",
+				icon: "question",
+				html: <BuyForm 
+          buyType={Action.BUY_SHARES} 
+          handleSubmit={handleSubmit} 
+          handleChange={handleChange} 
+          DNABalance={appContext.DNABalance} />,
+				showConfirmButton: false,
+				showCloseButton: true,
+			})
+		} else {
+			swalError(ErrorMessage.IF, Action.BUY_SHARES);
+		}
+	}
+
+  function updateDNAPrice(){
+    if(appContext.role === Role.OWNER){
+      MySwal.fire({
+				title: "Varia prezzo DNA Token",
+				icon: "question",
+				html: <BuyForm 
+          buyType={Action.UPDATE_PRICE} 
+          handleSubmit={handleSubmit} 
+          handleChange={handleChange} 
+          DNABalance={appContext.DNABalance} />,
+				showConfirmButton: false,
+				showCloseButton: true,
+			})
+		} else {
+			swalError(ErrorMessage.IF, Action.UPDATE_PRICE);
+		}
   }
 
 	async function handleSubmit(amount: number, buyType: string) {
 		let success;
 		setIsLoading(true);
-		if(buyType === "DNA"){
+		if(buyType === Action.BUY_DNA){
 			success = await buyDNAToken(amount);
-		} else if (buyType === "Shares"){
+		} else if (buyType === Action.BUY_SHARES) {
 			success = await buyShares(amount);
-		} else if (buyType === "Approve") {
+		} else if (buyType === Action.APPROVE_DNA) {
       success = await approveDNAToken(amount);
+    } else if (buyType === Action.UPDATE_PRICE){
+      success = await updateTokenPrice(amount);
     }
 		setIsLoading(false);
 		if(success){
 			Swal.fire({
 				icon: "success",
-				title: buyType === "Approve" ? "Richiesta di approvazione effettuata!" : "Richiesta di acquisto effettuata!",
-				text: "L'elaborazione della richiesta avverrà tra qualche secondo.\n\nPer OK Per continuare.",
+				title: buyType === Action.APPROVE_DNA ? "Richiesta di approvazione effettuata" : buyType === Action.UPDATE_PRICE ? "Richiesta di aggiornamento effettuata" : "Richiesta di acquisto effettuata",
+				text: "L'elaborazione della richiesta avverrà tra qualche secondo. Per OK Per continuare.",
 				showCloseButton: true,
 				showConfirmButton: true,
 				confirmButtonColor: "#3085d6",
 			});
 		} else {
-			console.log("Errore durante l'operazione di acquisto " + buyType);
+			console.log("Error during operation : " + buyType);
 		}
 	}
 
@@ -194,62 +198,43 @@ export default function DropdownMenu({ connect: connectWallet }: NavbarProps) {
 		const { balance, DNABalance, allowance } = appContext;
 		const weiBalance = formatWeiBalance(balance);
 
-		if (buyType === "Shares" && amount >= DNABalance) {
+		if (buyType === Action.BUY_SHARES && amount >= DNABalance) {
 			return appContext.DNABalance;
-		} else if (buyType === "DNA" && amount >= weiBalance && weiBalance <= currentSupply) {
+		} else if (buyType === Action.BUY_DNA && amount >= weiBalance && weiBalance <= currentSupply) {
 			return weiBalance;
-		} else if (buyType === "DNA" && amount >= currentSupply && weiBalance >= currentSupply) {
+		} else if (buyType === Action.BUY_DNA && amount >= currentSupply && weiBalance >= currentSupply) {
 			return currentSupply;
-		} else if (buyType === "Approve" && amount >= DNABalance) {
-			return DNABalance;
-		} else if (buyType === "Shares" && amount >= allowance){
+    } else if (buyType === Action.BUY_SHARES && amount >= allowance){
 			return allowance;
-		} else {
+		} else if (buyType === Action.APPROVE_DNA && amount >= DNABalance) {
+			return DNABalance;
+    } else {
 			return amount;
 		}
 	}
 
-	function buyDNA() {
-		if (appContext.balance > 0) {
-			MySwal.fire({
-				title: "Acquisto DNA",
-				icon: "question",
-				html: <BuyForm handleSubmit={handleSubmit} handleChange={handleChange} buyType="DNA" currentSupply={currentSupply} balance={formatWeiBalance(appContext.balance)} />,
-				showConfirmButton: false,
+  async function handleSubmitDelegation(delegateAddress: string, delegationType: string){
+    let success;
+    setIsLoading(true);
+    if(delegationType === Action.DELEGATE_MEMBER){
+      success = await delegateVote(delegateAddress);
+    } else if (delegationType === Action.REVOKE_DELEGATE){
+      success = await revokeMemberDelegation(delegateAddress);
+    }
+    setIsLoading(false);
+		if(success){
+			Swal.fire({
+				icon: "success",
+				title: delegationType === Action.DELEGATE_MEMBER ? "Richiesta di delega effettuata!" : "Richiesta di revoca delega effettuata!",
+				text: "L'elaborazione della richiesta avverrà tra qualche secondo.\n\nPer OK Per continuare.",
 				showCloseButton: true,
-			})
+				showConfirmButton: true,
+				confirmButtonColor: "#3085d6",
+			});
 		} else {
-			swalError(ErrorMessage.IF);
+			console.log("Error during delegation operation: " + delegationType);
 		}
-	}
-
-	function buyDNAShares() {
-		if (appContext.DNABalance > 0) {
-			MySwal.fire({
-				title: "Acquista DNA Shares",
-				icon: "question",
-				html: <BuyForm handleSubmit={handleSubmit} handleChange={handleChange} buyType="Shares" DNABalance={appContext.DNABalance} />,
-				showConfirmButton: false,
-				showCloseButton: true,
-			})
-		} else {
-			swalError(ErrorMessage.IF);
-		}
-	}
-
-	function approveDNA() {
-		if (appContext.DNABalance > 0) {
-			MySwal.fire({
-				title: "Acquista DNA Shares",
-				icon: "question",
-				html: <BuyForm handleSubmit={handleSubmit} handleChange={handleChange} buyType="Approve" DNABalance={appContext.allowance} />,
-				showConfirmButton: false,
-				showCloseButton: true,
-			})
-		} else {
-			swalError(ErrorMessage.IF);
-		}
-	}
+  }
 
 	const verifyAllowance = () => {
 		return appContext.DNABalance > 0 && appContext.allowance > 0;
@@ -278,8 +263,8 @@ export default function DropdownMenu({ connect: connectWallet }: NavbarProps) {
 
         {appContext.role === Role.MEMBER &&
           <Menu slots={{ listbox: Listbox }}>
-              <MenuItem> {appContext.shares} DNA Shares </MenuItem>
-              <MenuItem> {appContext.allowance} DNA Approvati </MenuItem>
+              <MenuItem> {appContext.DNABalance} DNA Token</MenuItem>
+              <MenuItem> {appContext.allowance} DNA Token Approvati </MenuItem>
               <MenuItem><hr/></MenuItem>
               <MenuItem onClick={buyDNA}> Acquista DNA Token </MenuItem>
               { verifyBalance() && 
@@ -289,15 +274,8 @@ export default function DropdownMenu({ connect: connectWallet }: NavbarProps) {
                 <MenuItem onClick={buyDNAShares}> Acquista DNA Shares </MenuItem>
               }
               <MenuItem><hr/></MenuItem>
-              { !hasDelegation && 
-                <MenuItem onClick={delegateMember}>Delega membro</MenuItem>
-              }
-              { hasDelegation && 
-                <MenuItem onClick={changeDelegateMember}>Cambia membro delega</MenuItem>
-              }
-              {/* { hasDelegation && 
-                  <MenuItem sx={{ color: "red" }} onClick={() => revokeDelegation()}>Revoca delega</MenuItem>
-              } */}
+              <MenuItem onClick={delegateVoteToMember}>Delega membro</MenuItem>
+              <MenuItem onClick={revokeDelegation}>Revoca delega</MenuItem>
           </Menu>
         }
 
@@ -305,21 +283,22 @@ export default function DropdownMenu({ connect: connectWallet }: NavbarProps) {
           <Menu slots={{ listbox: Listbox }}>
               {  appContext.saleActive &&
                 <>
-                <MenuItem> VENDITA SHARES ATTIVA</MenuItem>
+                <MenuItem> Vendita DNA Shares ATTIVA</MenuItem>
                 <MenuItem><hr/></MenuItem>
                 <MenuItem onClick={endSharesSale}>Termina vendita shares</MenuItem>
                 </>
               }
               {  !appContext.saleActive &&
                 <>
-                <MenuItem> VENDITA SHARES DISATTIVATA </MenuItem>
+                <MenuItem> Vendita DNA Shares DISATTIVATA </MenuItem>
                 <MenuItem><hr/></MenuItem>
                 <MenuItem onClick={activeSharesSale}>Attiva vendita shares</MenuItem>
                 </>
               }
-              {/* { hasDelegation && 
-                  <MenuItem sx={{ color: "red" }} onClick={() => revokeDelegation()}>Revoca delega</MenuItem>
-              } */}
+              {
+                !appContext.saleActive &&
+                <MenuItem onClick={updateDNAPrice}>Aggiorna prezzo DNA Shares</MenuItem>
+              }
           </Menu>
         }
       

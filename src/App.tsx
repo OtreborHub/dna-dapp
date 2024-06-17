@@ -10,8 +10,8 @@ import { ErrorMessage } from "./utilities/Error";
 import { Role, getRole } from "./utilities/Role";
 import ProposalDashboardView from "./components/views/ProposalDashboardView";
 import Typography from "@mui/material/Typography/Typography";
-import getDNAContractInstance, { readAllowance, readDNABalance } from "./utilities/DNABridge";
-import getDAOContractInstance, { readMember, readOwner, readSaleActive, readShares } from "./utilities/DAOBridge";
+import getDNAContractInstance, { readAllowance, readCurrentSupply, readDNABalance } from "./utilities/DNABridge";
+import getDAOContractInstance, { readMember, readOwner, readSaleState, readShares } from "./utilities/DAOBridge";
 
 declare global {
   interface Window {
@@ -104,8 +104,10 @@ export default function App() {
           appContext.updateAllowance(Number(allowance));
         }
 
-        const saleActive: boolean = await readSaleActive();
+        const saleActive: boolean = await readSaleState();
         appContext.updateSaleActive(saleActive);
+        const currentSupply: number = await readCurrentSupply();
+        appContext.updateCurrentSupply(Number(currentSupply));
 
         if(isMember){
           const shares: number = await readShares();
@@ -113,7 +115,7 @@ export default function App() {
         }
 
     } catch {
-      console.log("Errore durante l'inizializzazione del contratto");
+      console.log("Error contract initialization");
     }
 
   }

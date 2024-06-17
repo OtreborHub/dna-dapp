@@ -3,74 +3,150 @@ import { DNADAO_ABI } from "../abi/dao_abi";
 import { Action } from "./actions";
 import { ErrorMessage, swalError } from "./Error";
 import { Proposal } from "./interfaces";
+import Swal from "sweetalert2";
 
 export const DNADAO_ADDRESS: string = process.env.REACT_APP_DNADAO_ADDRESS as string;
 export var dao: Contract;
-export const EMPTY_PROPOSAL: Proposal = { address: "", title: "", description: "", voteCountPro: 0, voteCountCon: 0, voteCountAbstain: 0, executed: false, recipient: "", amount: 0 };
+export const EMPTY_PROPOSAL: Proposal = { address: "", title: "", description: "", voteCountPro: 0, voteCountCon: 0, voteCountAbstain: 0, executed: false, approved: false, recipient: "", amount: 0 };
 
 export default function getDAOContractInstance(provider: Provider, signer: string) {
   try {
     if (!dao) {
       dao = new Contract(DNADAO_ADDRESS, DNADAO_ABI, provider);
-      //addContractListeners(signer);
+      addContractListeners(signer);
     }
   } catch {
-    console.log("Errore durante la creazione dell'istanza del contratto: verificare l'indirizzo del contratto, l'abi e il provider utilizzato");
+    console.log("Error during contract instance creation: verifiy contract address, abi and provider used");
   }
-  
+
 }
 
 //EVENTS 
-// function addContractListeners(signer: string) {
-//   dao.on("BuyOrder", (customer, event) => {
-//     if (customer === signer) {
-//       //Firebase data
-//       Swal.fire({
-//         title: "Acquisto effettuato!",
-//         text: "Congratulazioni, sei appena diventato un membro della governance DNA.\n\nPremi OK per ricaricare la pagina ed accedere alle proposte.",
-//         icon: "success",
-//         confirmButtonColor: "#3085d6"
-//       }).then((result) => {
-//         if(result.isConfirmed){
-//           window.location.reload();
-//         }
-//       });
-//     }
-// })
-// }
+function addContractListeners(signer: string) {
+  dao.on("BuyOrder", (buyer, amount, event) => {
+    if (buyer === signer) {
+      Swal.fire({
+        title: "Acquisto effettuato!",
+        text: "Congratulazioni, sei appena diventato un membro della governance DNA.\n\nPremi OK per ricaricare la pagina ed accedere alle proposte.",
+        icon: "success",
+        confirmButtonColor: "#3085d6"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.reload();
+        }
+      });
+    }
+  })
+
+  dao.on("SaleState", (enabled, event) => {
+    Swal.fire({
+      title: enabled ? "Vendita Shares abilitata" : "Vendita Shares disabilitata",
+      text: enabled ? "Da ora è possibile comprare Shares dal Menù Ruolo\n\nPremi OK per ricaricare la pagina" : "Al momento non è più possibile comprare Shares dal Menù Ruolo\n\nPremi OK per ricaricare la pagina",
+      icon: enabled ? "success" : "error",
+      confirmButtonColor: "#3085d6"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.reload();
+      }
+    });
+  })
+
+  dao.on("NewProposal", async (title, event) => {
+    //leggere se signer isMember per stampare questo alert
+    const isMember = await readMember();
+    if (isMember) {
+      Swal.fire({
+        title: "Nuova proposta creata!\n\n" + title,
+        text: "E' stata generata una nuova proposta: si ricorda di leggere attentamente prima di procedere al voto.\n\nPremi OK per ricarica la pagina.",
+        icon: "success",
+        confirmButtonColor: "#3085d6"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.reload();
+        }
+      });
+    }
+  })
+
+  dao.on("Vote", async (member, event) => {
+    if (signer === member) {
+      Swal.fire({
+        title: "Voto effettuato!",
+        text: "Il tuo voto è stato registrato correttamente.\n\nPremi OK per ricarica la pagina.",
+        icon: "success",
+        confirmButtonColor: "#3085d6"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.reload();
+        }
+      });
+    }
+  })
+
+  dao.on("ExecutedProposal", async (title, approved, event) => {
+    const isOwner = await readOwner();
+    if (isOwner) {
+      Swal.fire({
+        title: "Risultato Proposta: " + title,
+        text: approved ? "La proposta '" + title + "' è stata approvata" : "La proposta '" + title + "'  non è stata approvata",
+        icon: "success",
+        confirmButtonColor: "#3085d6"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.reload();
+        }
+      });
+    }
+  })
+
+  dao.on("Delegation", async (to, addedRemoved, event) => {
+    const isMember = await readMember();
+    if (isMember) {
+      Swal.fire({
+        title: addedRemoved ? " Delega avvenuta con successo!" : "Delega rimossa",
+        text: addedRemoved ? "Da ora i voti eseguiti dal membro \n\n" + to + " conterranno anche le tue Shares!" : "Da ora il membro \n\n" + to + " \n\n non potrà più rappresentare il tuo voto",
+        icon: "success",
+        confirmButtonColor: "#3085d6"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.reload();
+        }
+      });
+    }
+  })
+}
 
 //Modificare in enableSale
-export async function activeSale(){
-  if(dao){
+export async function enableSale() {
+  if (dao) {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const signerContract = new ethers.Contract(DNADAO_ADDRESS, DNADAO_ABI, signer);
-  
-      await signerContract.activeSale();
+
+      await signerContract.enableSale();
       return true;
 
     } catch (error: any) {
-      console.log("activeSale action: " + ErrorMessage.TR);
+      console.log("enableSale action: " + ErrorMessage.TR);
       swalError(ErrorMessage.TR, Action.ENABLE_SALE, error);
       return false;
     }
   }
 }
 
-//Modificare in disableSale
-export async function endSale(){
-  if(dao){
+export async function disableSale() {
+  if (dao) {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const signerContract = new ethers.Contract(DNADAO_ADDRESS, DNADAO_ABI, signer);
-  
-      await signerContract.endSale();
+
+      await signerContract.disableSale();
       return true;
 
     } catch (error: any) {
-      console.log("endSale action: " + ErrorMessage.TR);
+      console.log("disableSale action: " + ErrorMessage.TR);
       swalError(ErrorMessage.TR, Action.DISABLE_SALE, error);
       return false;
     }
@@ -78,13 +154,13 @@ export async function endSale(){
 }
 
 
-export async function buyShares(amount: number){
-  if(dao){
+export async function buyShares(amount: number) {
+  if (dao) {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const signerContract = new ethers.Contract(DNADAO_ADDRESS, DNADAO_ABI, signer);
-  
+
       await signerContract.buyShares(amount);
       return true;
 
@@ -96,36 +172,33 @@ export async function buyShares(amount: number){
   }
 }
 
-export async function vote(proposalAddr: string, support: boolean, abstain: boolean){
+export async function voteProposal(proposalAddr: string, support: boolean, abstain: boolean) {
   try {
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
     const signerContract = new ethers.Contract(DNADAO_ADDRESS, DNADAO_ABI, signer);
 
-    await signerContract.vote(proposalAddr, support, abstain);
+    await signerContract.voteProposal(proposalAddr, support, abstain);
     return true;
 
   } catch (error: any) {
     console.log("vote action: " + ErrorMessage.TR);
-    swalError(ErrorMessage.TR, Action.VOTE, error);
+    swalError(ErrorMessage.TR, Action.VOTE_PROP, error);
     return false;
   }
 }
 
-
-//Quando le proposte saranno troppe e non si vorrà fetchare tante proposte alla volta
-//sarà sufficiente modificare la variabile d'ambiente FROM, 
-//per consentire all'applicazione di estrarre proposte a partire dall'indice indicato
-//default REACT_APP_FROM = 0
-
 export async function readProposals() {
   var proposals: Proposal[] = [];
-  // let from : number = Number(process.env.REACT_APP_FROM as string);
+
+  //Variabile d'ambiente da modificare in caso le proposte estratte siano 
+  //eccessive per il front-end o per il numero di chiamate effettuate.
+  const FROM : string = process.env.REACT_APP_FROM as string;
 
   try {
     const contractProposals = await dao.getProposals();
-    if(contractProposals.length > 0){
-      for(let i = 0; i < contractProposals.length; i++){
+    if (contractProposals.length > 0) {
+      for (let i = Number(FROM); i < contractProposals.length; i++) {
         const resultProposal = contractProposals[i];
         let proposal: Proposal = {
           address: resultProposal[0],
@@ -135,8 +208,9 @@ export async function readProposals() {
           voteCountCon: Number(resultProposal[4]),
           voteCountAbstain: Number(resultProposal[5]),
           executed: Boolean(resultProposal[6]),
-          recipient: resultProposal[7],
-          amount: Number(resultProposal[8])
+          approved: Boolean(resultProposal[7]),
+          recipient: resultProposal[8],
+          amount: Number(resultProposal[9])
         }
 
         proposals.push(proposal);
@@ -149,8 +223,8 @@ export async function readProposals() {
     console.log("readAllMagazines action: " + ErrorMessage.RD);
     swalError(ErrorMessage.RD, Action.RD_ALL_PROP, error);
     return [];
-  } 
- }
+  }
+}
 
 export async function readShares() {
   if (dao) {
@@ -168,14 +242,14 @@ export async function readShares() {
   }
 }
 
-export async function readSaleActive(){
+export async function readSaleState() {
   if (dao) {
-    try{
-      const saleActive = await dao.saleActive();
+    try {
+      const saleActive = await dao.saleEnabled();
       return saleActive;
 
     } catch (error: any) {
-      console.log("readSaleActive action: " + ErrorMessage.RD);
+      console.log("readSaleState action: " + ErrorMessage.RD);
       swalError(ErrorMessage.RD, Action.RD_DATA, error);
       return false;
     }
@@ -184,7 +258,7 @@ export async function readSaleActive(){
 
 export async function readOwner() {
   if (dao) {
-    try{
+    try {
       const owner = await dao.owner();
       return owner;
 
@@ -197,13 +271,13 @@ export async function readOwner() {
 
 export async function readMember() {
   if (dao) {
-    try{
+    try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const signerContract = new ethers.Contract(DNADAO_ADDRESS, DNADAO_ABI, signer);
 
       return await signerContract.isMember();
-    
+
     } catch (error: any) {
       console.log("readMember action: " + ErrorMessage.RD);
       swalError(ErrorMessage.RD, Action.RD_DATA, error);
@@ -211,16 +285,16 @@ export async function readMember() {
   }
 }
 
-export async function delegateMember(address: string) {
+export async function delegateVote(address: string) {
   if (dao) {
-    try{
+    try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const signerContract = new ethers.Contract(DNADAO_ADDRESS, DNADAO_ABI, signer);
-  
-      await signerContract.delegateVote(address);
+
+      await signerContract.delegateMember(address);
       return true;
-      
+
     } catch (error: any) {
       console.log("delegateMember action: " + ErrorMessage.TR);
       swalError(ErrorMessage.TR, Action.DELEGATE_MEMBER, error);
@@ -229,9 +303,27 @@ export async function delegateMember(address: string) {
   }
 }
 
+export async function revokeMemberDelegation(address: string) {
+  if (dao) {
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const signerContract = new ethers.Contract(DNADAO_ADDRESS, DNADAO_ABI, signer);
+
+      await signerContract.revokeDelegation(address);
+      return true;
+
+    } catch (error: any) {
+      console.log("delegateMember action: " + ErrorMessage.TR);
+      swalError(ErrorMessage.TR, Action.REVOKE_DELEGATE, error);
+      return false;
+    }
+  }
+}
+
 export async function createProposal(proposal: Proposal) {
   if (dao) {
-    try{
+    try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const signerContract = new ethers.Contract(DNADAO_ADDRESS, DNADAO_ABI, signer);
@@ -248,18 +340,21 @@ export async function createProposal(proposal: Proposal) {
   }
 }
 
-export async function executeProposal(index: number) {
+export async function executeProposal(proposalAddress: string) {
   if (dao) {
-    try{
-      
+    try {
+
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const signerContract = new ethers.Contract(DNADAO_ADDRESS, DNADAO_ABI, signer);
-  
-      return await signerContract.executeProposal(index);
+
+      await signerContract.executeProposal(proposalAddress);
+      return true;
+
     } catch (error: any) {
       console.log("executeProposal action: " + ErrorMessage.TR);
       swalError(ErrorMessage.TR, Action.EXECUTE_PROP, error);
+      return false;
     }
   }
 
