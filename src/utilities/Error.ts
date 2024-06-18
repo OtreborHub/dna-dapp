@@ -34,6 +34,7 @@ export enum ErrorMessage {
     PROP_EXECUTED="Proposal already executed",
     NOT_ENOGHT_VOTES="Not enoght votes",
     PROP_TRANSFER="Token transfer failed",
+    PROP_NOT_FUND="Proposal not fund"
 
 }
 

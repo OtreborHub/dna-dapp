@@ -51,7 +51,7 @@ export const DNADAO_ABI =
 				"type": "bool"
 			}
 		],
-		"name": "Delegation",
+		"name": "DelegationState",
 		"type": "event"
 	},
 	{
@@ -66,24 +66,17 @@ export const DNADAO_ABI =
 			{
 				"indexed": false,
 				"internalType": "bool",
+				"name": "created",
+				"type": "bool"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
 				"name": "approved",
 				"type": "bool"
 			}
 		],
-		"name": "ExecutedProposal",
-		"type": "event"
-	},
-	{
-		"anonymous": false,
-		"inputs": [
-			{
-				"indexed": false,
-				"internalType": "string",
-				"name": "title",
-				"type": "string"
-			}
-		],
-		"name": "NewProposal",
+		"name": "ProposalState",
 		"type": "event"
 	},
 	{
@@ -163,11 +156,11 @@ export const DNADAO_ABI =
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "to",
+				"name": "member",
 				"type": "address"
 			}
 		],
-		"name": "delegateVote",
+		"name": "delegateMember",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -395,7 +388,7 @@ export const DNADAO_ABI =
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "to",
+				"name": "member",
 				"type": "address"
 			}
 		],
@@ -412,6 +405,82 @@ export const DNADAO_ABI =
 				"internalType": "bool",
 				"name": "",
 				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "proposalAddr",
+				"type": "address"
+			}
+		],
+		"name": "searchProposal",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "proposalAddr",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "title",
+						"type": "string"
+					},
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "voteCountPro",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "voteCountCon",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "voteCountAbstain",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "executed",
+						"type": "bool"
+					},
+					{
+						"internalType": "bool",
+						"name": "approved",
+						"type": "bool"
+					},
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct DNADAO.Proposal",
+				"name": "",
+				"type": "tuple"
 			}
 		],
 		"stateMutability": "view",

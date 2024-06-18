@@ -22,21 +22,6 @@ export default function getDNAContractInstance(provider: Provider, signer: strin
 
 //EVENTS 
 function addContractListeners(signer: string) {
-  token.on("Approval", (owner, spender, value, event) => {
-    if (owner === signer) {
-      Swal.fire({
-        title: "Approvazione effettuata!",
-        text: "L'approvazione dei DNA è avvenuta con successo. Con i tuoi DNA ora puoi comprare shares dell'orgazzione DnA.\n\nPremi OK per ricaricare la pagina.",
-        icon: "success",
-        confirmButtonColor: "#3085d6"
-      }).then((result) => {
-        if(result.isConfirmed){
-          window.location.reload();
-        }
-      });
-    }}
-  );
-
   token.on("BuyOrder", (buyer, amount, event) => {
     if (buyer === signer) {
       Swal.fire({
@@ -49,8 +34,39 @@ function addContractListeners(signer: string) {
           window.location.reload();
         }
       });
-    }}
-  );
+    }
+  });
+
+  token.on("Approval", (owner, spender, value, event) => {
+    if (owner === signer) {
+      Swal.fire({
+        title: "Approvazione effettuata!",
+        text: "L'approvazione dei DNA è avvenuta con successo. Con i tuoi DNA ora puoi comprare shares dell'orgazzione DnA.\n\nPremi OK per ricaricare la pagina.",
+        icon: "success",
+        confirmButtonColor: "#3085d6"
+      }).then((result) => {
+        if(result.isConfirmed){
+          window.location.reload();
+        }
+      });
+    }
+  });
+
+  token.on("UpdatePrice", async (newPrice, event) => {
+    const owner = await readOwner();
+    if(signer === owner) {
+    Swal.fire({
+      title: "Prezzo dei DNA Token aggiornato!",
+      text: "Il nuovo prezzo dei DNA Token è: " + newPrice +  ". Approva i tuoi Token e poi usali per acquistare Shares.\n\nPremi OK per ricaricare la pagina.",
+      icon: "success",
+      confirmButtonColor: "#3085d6"
+    }).then((result) => {
+      if(result.isConfirmed){
+        window.location.reload();
+      }
+    });
+    }
+  });
 }
 
 export async function readCurrentSupply() {
@@ -76,6 +92,19 @@ export async function readDNABalance(){
     console.log("readDNABalance action: " + ErrorMessage.TR);
     swalError(ErrorMessage.TR, Action.RD_DATA, error);
     return 0.0;
+  }
+}
+
+export async function readOwner() {
+  if (token) {
+    try {
+      const owner = await token.owner();
+      return owner;
+
+    } catch (error: any) {
+      console.log("readOwner action: " + ErrorMessage.RD);
+      swalError(ErrorMessage.RD, Action.RD_DATA, error);
+    }
   }
 }
 

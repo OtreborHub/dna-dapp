@@ -51,13 +51,41 @@ function addContractListeners(signer: string) {
     });
   })
 
-  dao.on("NewProposal", async (title, event) => {
+  dao.on("ProposalState", async (title, created, approved, event) => {
     //leggere se signer isMember per stampare questo alert
     const isMember = await readMember();
-    if (isMember) {
+    const owner = await readOwner();
+    if (isMember && created) {
       Swal.fire({
         title: "Nuova proposta creata!\n\n" + title,
         text: "E' stata generata una nuova proposta: si ricorda di leggere attentamente prima di procedere al voto.\n\nPremi OK per ricarica la pagina.",
+        icon: "success",
+        confirmButtonColor: "#3085d6"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.reload();
+        }
+      });
+    } else if (signer === owner && !created){
+      Swal.fire({
+        title: "Risultato Proposta: " + title,
+        text: approved ? "La proposta '" + title + "' è stata approvata" : "La proposta '" + title + "'  non è stata approvata",
+        icon: "success",
+        confirmButtonColor: "#3085d6"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.reload();
+        }
+      });
+    }
+  })
+
+  dao.on("DelegationState", async (to, addedRemoved, event) => {
+    const isMember = await readMember();
+    if (isMember) {
+      Swal.fire({
+        title: addedRemoved ? " Delega avvenuta con successo!" : "Delega rimossa",
+        text: addedRemoved ? "Da ora i voti eseguiti dal membro \n\n" + to + " conterranno anche le tue Shares!" : "Da ora il membro \n\n" + to + " \n\n non potrà più rappresentare il tuo voto",
         icon: "success",
         confirmButtonColor: "#3085d6"
       }).then((result) => {
@@ -83,37 +111,6 @@ function addContractListeners(signer: string) {
     }
   })
 
-  dao.on("ExecutedProposal", async (title, approved, event) => {
-    const isOwner = await readOwner();
-    if (isOwner) {
-      Swal.fire({
-        title: "Risultato Proposta: " + title,
-        text: approved ? "La proposta '" + title + "' è stata approvata" : "La proposta '" + title + "'  non è stata approvata",
-        icon: "success",
-        confirmButtonColor: "#3085d6"
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.reload();
-        }
-      });
-    }
-  })
-
-  dao.on("Delegation", async (to, addedRemoved, event) => {
-    const isMember = await readMember();
-    if (isMember) {
-      Swal.fire({
-        title: addedRemoved ? " Delega avvenuta con successo!" : "Delega rimossa",
-        text: addedRemoved ? "Da ora i voti eseguiti dal membro \n\n" + to + " conterranno anche le tue Shares!" : "Da ora il membro \n\n" + to + " \n\n non potrà più rappresentare il tuo voto",
-        icon: "success",
-        confirmButtonColor: "#3085d6"
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.reload();
-        }
-      });
-    }
-  })
 }
 
 //Modificare in enableSale
