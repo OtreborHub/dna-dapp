@@ -58,9 +58,9 @@ function addContractListeners(signer: string) {
     if (isMember && created) {
       Swal.fire({
         title: "Nuova proposta creata!\n\n" + title,
-        text: "E' stata generata una nuova proposta: si ricorda di leggere attentamente prima di procedere al voto.\n\nPremi OK per ricarica la pagina.",
+        text: "E' stata generata una nuova proposta: si ricorda di leggere attentamente prima di procedere al voto.\nPremi OK per ricarica la pagina.",
         icon: "success",
-        confirmButtonColor: "#3085d6"
+        confirmButtonColor: "#3085d6",
       }).then((result) => {
         if (result.isConfirmed) {
           window.location.reload();

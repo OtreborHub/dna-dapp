@@ -22,8 +22,8 @@ export default function getDNAContractInstance(provider: Provider, signer: strin
 
 //EVENTS 
 function addContractListeners(signer: string) {
-  token.on("BuyOrder", (buyer, amount, event) => {
-    if (buyer === signer) {
+  token.on("Transfer", (owner, to, nToken, event) => {
+    if (to === signer) {
       Swal.fire({
         title: "Acquisto effettuato!",
         text: "L'acquisto dei DNA Token è avvenuta con successo. Approva i tuoi Token e poi usali per acquistare Shares.\n\nPremi OK per ricaricare la pagina.",
@@ -41,7 +41,7 @@ function addContractListeners(signer: string) {
     if (owner === signer) {
       Swal.fire({
         title: "Approvazione effettuata!",
-        text: "L'approvazione dei DNA è avvenuta con successo. Con i tuoi DNA ora puoi comprare shares dell'orgazzione DnA.\n\nPremi OK per ricaricare la pagina.",
+        text: "L'approvazione dei Token DNA è avvenuta con successo. Convertendoli in Shares diventerai membro dell'organizzione DnA.\n\nPremi OK per ricaricare la pagina.",
         icon: "success",
         confirmButtonColor: "#3085d6"
       }).then((result) => {

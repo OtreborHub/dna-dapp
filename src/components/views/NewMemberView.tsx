@@ -176,7 +176,7 @@ export default function NewMemberView({ errorMessage }: ErrorProps) {
 							<Typography fontSize={"small"}>Tutti i DNA Token sono stati approvati all'acquisto degli shares</Typography>
 						}
 						{appContext.DNABalance > appContext.allowance &&
-							<Typography fontSize={"small"}>Puoi approvare ancora {appContext.DNABalance - appContext.allowance} DNA</Typography>
+							<Typography fontSize={"small"}>Hai approvato solo { appContext.allowance} DNA</Typography>
 						}
 						<Button
 							onClick={buyDNAShares}

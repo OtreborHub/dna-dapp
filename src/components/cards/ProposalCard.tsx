@@ -78,10 +78,10 @@ export default function ProposalCard({ proposal, handleVote, handleExecute }: Pr
             <>
               <hr />
               <Typography variant="body2" color="text.secondary">
-                {"Risultato: " + proposal.voteCountPro + " / " + proposal.voteCountCon}
+                {"Risultato: " + proposal.voteCountPro + " / " + proposal.voteCountCon} {"Shares"}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {"Astenuti: " + proposal.voteCountAbstain}
+                {"Astenuti: " + proposal.voteCountAbstain} {"Shares"}
               </Typography>
             </>
           }

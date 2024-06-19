@@ -21,13 +21,13 @@ export default function BuyForm ({ buyType, handleSubmit, handleChange, DNABalan
     <Box component="form" onSubmit={submit} sx={{ p: 2 }}>
       <Typography variant="body1" gutterBottom>
         {buyType === Action.BUY_DNA && 
-        "Scegli una quantità in wei da trasformare in DNA!"
+        "Scegli una quantità in wei da trasformare in DNA"
         }
         {buyType === Action.BUY_SHARES && 
-        "Scegli una quantità in DNA da trasformare in Shares!"
+        "Scegli una quantità in DNA da trasformare in Shares"
         }
         {buyType === Action.APPROVE_DNA && 
-        "Scegli una quantità in DNA da approvare per l'acquisto di Shares!"
+        "Scegli una quantità in DNA da approvare per l'acquisto di Shares"
         }
         {buyType === Action.UPDATE_PRICE && 
         "Scegli il nuovo prezzo per i DNA Token"

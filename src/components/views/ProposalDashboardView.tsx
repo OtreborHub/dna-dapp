@@ -51,9 +51,10 @@ export default function ProposalDashboardView() {
       if(success){
         Swal.fire({
           title: "Nuova proposta",
-          text: "La richiesta di inserimento è avvenuta con successo!\n\n Per favore attendi l'elaborazione del nuova proposta.",
+          text: "La richiesta di inserimento è avvenuta con successo!\n Per favore attendi l'elaborazione del nuova proposta.",
           icon: "success",
           confirmButtonColor: "#3085d6",
+          html: true
         });
       }
       setIsLoading(false);
@@ -109,7 +110,24 @@ export default function ProposalDashboardView() {
 
   return (
     <>
+      { activeProposals && activeProposals.length === 0  && executedProposals && executedProposals.length === 0 &&
+      <Box alignItems={"center"} textAlign={"center"} >
+      <Typography variant="h4" fontFamily={"sans-serif"} sx={{ cursor: 'default' }}> Nessuna proposta inserita </Typography>
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          sx={{borderRadius: "10px"}}
+          onClick={() => newProposal()}
+          endIcon={<AddCircleIcon />}>
+          <strong>NUOVA PROPOSTA </strong>
+        </Button>
+      </Box>
+      }
+
       {/* PROPOSTE ATTIVE */}
+      { activeProposals && activeProposals.length > 0 &&
+      <>
       <Typography variant="h4" textAlign={"left"} marginLeft={"2rem"} fontFamily={"sans-serif"} sx={{ cursor: 'default' }}> Proposte da valutare </Typography>
       <Box className="card-div" paddingBottom={"2rem"}>
         <Grid container spacing={isMobile ? 4 : 2} sx={{ margin: "1rem" }}>
@@ -121,6 +139,7 @@ export default function ProposalDashboardView() {
                 handleExecute={execute}
               />
             </Grid>
+            
           )}
           <Grid item sx={{ alignSelf: "center" }} xs={6} md={4} xl={3}>
           { appContext.role === Role.MEMBER && 
@@ -137,22 +156,27 @@ export default function ProposalDashboardView() {
           </Grid>
         </Grid>
       </Box>
+      </>
+      }
 
       {/* PROPOSTE ESEGUITE */}
-      <Typography variant="h4" textAlign={"left"} marginLeft={"2rem"} fontFamily={"sans-serif"} sx={{ cursor: 'default' }}> Proposte eseguite</Typography>
-      
-      <Box className="card-div" paddingBottom={"2rem"}>
-        <Grid container spacing={isMobile ? 4 : 2} sx={{ margin: "1rem" }}>
-          {executedProposals?.map(el =>
-            <Grid item key={el.title} xs={6} md={4} xl={3}>
-              <ProposalCard
-                proposal={el}
-              />
-            </Grid>
-          )}
-        </Grid>
-      </Box>
-
+      { executedProposals && executedProposals.length > 0 &&
+      <>
+        <Typography variant="h4" textAlign={"left"} marginLeft={"2rem"} fontFamily={"sans-serif"} sx={{ cursor: 'default' }}> Proposte eseguite</Typography>
+        
+        <Box className="card-div" paddingBottom={"2rem"}>
+          <Grid container spacing={isMobile ? 4 : 2} sx={{ margin: "1rem" }}>
+            {executedProposals?.map(el =>
+              <Grid item key={el.title} xs={6} md={4} xl={3}>
+                <ProposalCard
+                  proposal={el}
+                />
+              </Grid>
+            )}
+          </Grid>
+        </Box>
+      </>
+      }
       <Loader loading={isLoading}/>
     </>
   );
