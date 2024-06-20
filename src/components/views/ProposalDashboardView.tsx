@@ -59,7 +59,7 @@ export default function ProposalDashboardView() {
       }
       setIsLoading(false);
     } catch (error) {
-      console.log("");
+      console.log("error during creating proposal");
     }
   }
 

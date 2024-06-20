@@ -159,9 +159,9 @@ export default function App() {
           DnA DAO Administration
         </Typography>
       
-      { !verifyWalletNetwork() && <NewMemberView errorMessage={ErrorMessage.WALLET_ERROR}/> }
-      { verifyWalletNetwork() && !verifyRole() && !verifyDNABalance() && <NewMemberView errorMessage={ErrorMessage.NO_DNA_TOKEN} />}
-      { verifyWalletNetwork() && !verifyRole() && verifyDNABalance() && <NewMemberView errorMessage={ErrorMessage.NOT_MEMBER} />}
+      { !verifyWalletNetwork() && <NewMemberView message={ErrorMessage.WALLET_ERROR}/> }
+      { verifyWalletNetwork() && !verifyRole() && !verifyDNABalance() && <NewMemberView message={ErrorMessage.NO_DNA_TOKEN} />}
+      { verifyWalletNetwork() && !verifyRole() && verifyDNABalance() && <NewMemberView message={ErrorMessage.NOT_MEMBER} />}
       { verifyWalletNetwork() && verifyRole() && <ProposalDashboardView /> }
 
       </div>

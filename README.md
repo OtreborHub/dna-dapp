@@ -45,15 +45,16 @@ Ogni funzionalità che coinvolge Metamask è collegata tramite ethers e i bridge
 >(folder)**/abi**: contiene gli abi degli smart contract utilizzati
 >(folder)**/utilities**: contiene i file trasversali al progetto, come le classi bridge, la gestione degli errori e della formattazione del testo. 
 >(folder)**/components**: infatti troviamo prima i componenti sempre presenti a schermo e diverse sottocartelle di componenti che vengono visualizzati sulla base del wallet collegato (e del suo ruolo nella Governance DNA):
-  * <i> cards </i> con gli elementi frontend che rappresentano le singole proposte. 
-  * <i> forms </i> con gli elementi frontend che richiedono azioni di input e di submit da parte dell'utente. 
-  * <i> view </i> con gli elementi frontend visualizzati per i membri della Governance DNA e per i nuovi utenti.
+>  * <i> cards </i> con gli elementi frontend che rappresentano le singole proposte. 
+>  * <i> forms </i> con gli elementi frontend che richiedono azioni di input e di submit da parte dell'utente. 
+>  * <i> view </i> con gli elementi frontend visualizzati per i membri della Governance DNA e per i nuovi utenti.<br>
+><br>
 
 <h2><b>Eseguire il progetto in locale</b></h2>
 
 *Installazione*
 
-Partendo dalla root del progetto science-magazine-store aprire il terminale ed eseguire
+Partendo dalla root del progetto dna-dao aprire il terminale ed eseguire
 
 > **npm install**
 

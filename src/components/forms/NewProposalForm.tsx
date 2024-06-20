@@ -32,7 +32,6 @@ export default function NewProposalForm ({ handleSubmit }: ProposalFormProps) {
 
   const submit = (event : any) => {
     event.preventDefault();
-    //trasformAmountByCurrency(formData.currency) - inserire nell'helper
     handleSubmit(formData.title, formData.description, formData.recipient, formData.amount);
   };
 

@@ -8,11 +8,11 @@ import { approveDNAToken, buyDNAToken } from "../../utilities/DNABridge";
 import { ErrorMessage, swalError, transformMessage } from '../../utilities/Error';
 import { Action } from "../../utilities/actions";
 import { formatWeiBalance } from "../../utilities/helper";
-import { ErrorProps } from "../../utilities/interfaces";
+import { NewMemberProps } from "../../utilities/interfaces";
 import Loader from "../Loader";
 import BuyForm from "../forms/BuyForm";
 
-export default function NewMemberView({ errorMessage }: ErrorProps) {
+export default function NewMemberView({ message }: NewMemberProps) {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 	const appContext = useAppContext();
 	const MySwal = withReactContent(Swal);
@@ -143,9 +143,9 @@ export default function NewMemberView({ errorMessage }: ErrorProps) {
 				}}
 			>
 
-				{transformMessage(errorMessage)[0]}
+				{transformMessage(message)[0]}
 				<br />
-				{transformMessage(errorMessage)[1]}
+				{transformMessage(message)[1]}
 
 				<Button
 					onClick={buyDNA}
@@ -156,7 +156,7 @@ export default function NewMemberView({ errorMessage }: ErrorProps) {
 				</Button>
 				<Typography fontSize={"small"}>Rimangono {appContext.currentSupply} DNA disponibili</Typography>
 
-				{errorMessage === ErrorMessage.NOT_MEMBER &&
+				{message === ErrorMessage.NOT_MEMBER &&
 					<>
 						<br />
 						{transformMessage(ErrorMessage.APPROVE_ISTRUCTION)[0]}

@@ -5,9 +5,9 @@ export enum ErrorMessage {
 
     //WALLET FRONTEND ERRORS
     WALLET_ERROR="Benvenuto! ]Per favore connetti il tuo wallet sulla rete Sepolia Testnet per accedere all'applicativo",
-    NO_DNA_TOKEN = "Il tuo portafoglio non contiene DNA.]Acquista Token DNA per avere accesso alla governance!",
-    NOT_MEMBER = "Il tuo portafoglio non appartiene al registro dei membri.]Acquista parte delle shares DnA ed inizia la tua avventura con noi!",
-    APPROVE_ISTRUCTION = "Per prima cosa approva una quantità di DNA Token che DNA Administration potrà usare per l'acquisto degli share,]successivamente puoi spenderli per acquistare Shares.",
+    NO_DNA_TOKEN="Il tuo portafoglio non contiene DNA.]Acquista Token DNA per avere accesso alla governance!",
+    NOT_MEMBER="Il tuo portafoglio non appartiene al registro dei membri.]Acquista parte delle shares DnA ed inizia la tua avventura con noi!",
+    APPROVE_ISTRUCTION="Per prima cosa approva una quantità di DNA Token che DNA Administration potrà usare per l'acquisto degli share,]successivamente puoi spenderli per acquistare Shares.",
     
     ALREADY_VOTED="Already voted",
 
@@ -59,7 +59,8 @@ export function swalError(errorMessage: ErrorMessage, action?: Action, error?: a
         shortMessage = shortMessage.charAt(0).toUpperCase() + shortMessage.slice(1);
     }
 
-    switch(shortMessage ? shortMessage : errorMessage){
+    let outputMessage = shortMessage ? shortMessage : errorMessage;
+    switch(outputMessage){
         case ErrorMessage.RD:
             title = "Errore durante il recupero dei dati";
             if(action){

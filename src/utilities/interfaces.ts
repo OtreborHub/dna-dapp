@@ -5,8 +5,8 @@ interface NavbarProps {
     connect: () => void;
 }
 
-interface ErrorProps {
-    errorMessage: ErrorMessage;
+interface NewMemberProps {
+    message: ErrorMessage;
 }
 
 interface ProposalProps {
@@ -54,4 +54,4 @@ interface LoaderProps {
     loading: boolean
 }
 
-export type { NavbarProps, ErrorProps, ProposalProps, Proposal, CustomSelectProps, ProposalFormProps, BuyFormProps, LoaderProps, DelegationFormProps }
+export type { NavbarProps, NewMemberProps, ProposalProps, Proposal, CustomSelectProps, ProposalFormProps, BuyFormProps, LoaderProps, DelegationFormProps }
