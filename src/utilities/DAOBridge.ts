@@ -84,7 +84,7 @@ function addContractListeners(signer: string) {
     const isMember = await readMember();
     if (isMember) {
       Swal.fire({
-        title: addedRemoved ? " Delega avvenuta con successo!" : "Delega rimossa",
+        title: addedRemoved ? "Delega avvenuta con successo!" : "Delega rimossa",
         text: addedRemoved ? "Da ora i voti eseguiti dal membro \n\n" + to + " conterranno anche le tue Shares!" : "Da ora il membro \n\n" + to + " \n\n non potrà più rappresentare il tuo voto",
         icon: "success",
         confirmButtonColor: "#3085d6"
@@ -100,7 +100,7 @@ function addContractListeners(signer: string) {
     if (signer === member) {
       Swal.fire({
         title: "Voto effettuato!",
-        text: "Il tuo voto è stato registrato correttamente.\n\nPremi OK per ricarica la pagina.",
+        text: "Il tuo voto è stato registrato correttamente: attendi l'esecuzione della proposta da parte dell'Owner per scoprire il risultato!\nPremi OK per ricarica la pagina.",
         icon: "success",
         confirmButtonColor: "#3085d6"
       }).then((result) => {
