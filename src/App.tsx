@@ -10,7 +10,7 @@ import { ErrorMessage } from "./utilities/Error";
 import { Role, getRole } from "./utilities/Role";
 import ProposalDashboardView from "./components/views/ProposalDashboardView";
 import Typography from "@mui/material/Typography/Typography";
-import getDNAContractInstance, { readAllowance, readCurrentSupply, readDNABalance } from "./utilities/DNABridge";
+import getDNAContractInstance, { readAllowance, readCurrentSupply, readDNABalance, readTokenPrice } from "./utilities/DNABridge";
 import getDAOContractInstance, { readMember, readOwner, readSaleState, readShares } from "./utilities/DAOBridge";
 
 declare global {
@@ -108,6 +108,8 @@ export default function App() {
         appContext.updateSaleActive(saleActive);
         const currentSupply: number = await readCurrentSupply();
         appContext.updateCurrentSupply(Number(currentSupply));
+        const tokenPrice: number = await readTokenPrice();
+        appContext.updateTokenPrice(Number(tokenPrice));
 
         if(isMember){
           const shares: number = await readShares();
@@ -156,7 +158,7 @@ export default function App() {
           paddingBottom={"3rem"} 
           textAlign={"center"}
           sx={{ cursor: 'default' }}>
-          DnA DAO Administration
+          DnA DAO Governance
         </Typography>
       
       { !verifyWalletNetwork() && <NewMemberView message={ErrorMessage.WALLET_ERROR}/> }

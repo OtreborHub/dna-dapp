@@ -4,7 +4,7 @@ import { Action } from '../../utilities/actions';
 import { BuyFormProps } from '../../utilities/interfaces';
 
 
-export default function BuyForm ({ buyType, handleSubmit, handleChange, DNABalance, currentSupply } : BuyFormProps) {
+export default function BuyForm ({ buyType, handleSubmit, handleChange, DNABalance, currentSupply, tokenPrice } : BuyFormProps) {
   const [inputValue, setInputValue] = useState<number>(1);
 
   const change = (event: any) => {
@@ -21,7 +21,7 @@ export default function BuyForm ({ buyType, handleSubmit, handleChange, DNABalan
     <Box component="form" onSubmit={submit} sx={{ p: 2 }}>
       <Typography variant="body1" gutterBottom>
         {buyType === Action.BUY_DNA && 
-        "Scegli una quantità in wei da trasformare in DNA"
+        "Scegli una quantità in wei da trasformare in DNA ( " + tokenPrice + " wei per DNA Token)" 
         }
         {buyType === Action.BUY_SHARES && 
         "Scegli una quantità in DNA da trasformare in Shares"

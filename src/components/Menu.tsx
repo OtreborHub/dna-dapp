@@ -3,12 +3,12 @@ import { Menu } from '@mui/base/Menu';
 import { MenuButton as BaseMenuButton } from '@mui/base/MenuButton';
 import { MenuItem as BaseMenuItem, menuItemClasses } from '@mui/base/MenuItem';
 import { styled } from '@mui/system';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { useAppContext } from '../Context';
 import { buyShares, delegateVote, disableSale, enableSale, revokeMemberDelegation } from '../utilities/DAOBridge';
-import { approveDNAToken, buyDNAToken, readCurrentSupply, updateTokenPrice } from '../utilities/DNABridge';
+import { approveDNAToken, buyDNAToken, updateTokenPrice, token } from '../utilities/DNABridge';
 import { ErrorMessage, swalError } from '../utilities/Error';
 import { Role } from '../utilities/Role';
 import { Action } from '../utilities/actions';
@@ -20,24 +20,9 @@ import DelegationForm from './forms/DelegationForm';
 
 export default function DropdownMenu({ connect: connectWallet }: NavbarProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [currentSupply, setCurrentSupply] = useState<number>(0);
   const appContext = useAppContext();
   const MySwal = withReactContent(Swal);
 
-
-  useEffect(() => {
-    getCurrentSupply();
-  })
-
-  async function getCurrentSupply() {
-    try {
-      const supply = await readCurrentSupply();
-      setCurrentSupply(supply ? supply : 0);
-    } catch (error) {
-      console.log("Error while reading contract data");
-    }
-  }
-    
   async function endSharesSale(){
     try {
       const success = await disableSale();
@@ -104,7 +89,8 @@ export default function DropdownMenu({ connect: connectWallet }: NavbarProps) {
           buyType={Action.BUY_DNA} 
           handleSubmit={handleSubmit} 
           handleChange={handleChange} 
-          currentSupply={currentSupply} />,
+          currentSupply={appContext.currentSupply}
+          tokenPrice={appContext.tokenPrice} />,
 				showConfirmButton: false,
 				showCloseButton: true,
 			})
@@ -195,7 +181,7 @@ export default function DropdownMenu({ connect: connectWallet }: NavbarProps) {
 	}
 
 	function handleChange(amount: number, buyType: string) {
-		const { balance, DNABalance, allowance } = appContext;
+		const { balance, DNABalance, allowance, currentSupply } = appContext;
 		const weiBalance = formatWeiBalance(balance);
 
 		if (buyType === Action.BUY_SHARES && amount >= DNABalance) {

@@ -16,6 +16,7 @@ const appContext = createContext({
   updateRole: (role: Role) => {},
   updateSaleActive: (saleActive: boolean) => {},
   updateCurrentSupply: (currentSupply: number) => {},
+  updateTokenPrice: (tokenPrice: number) => {},
   provider: infuraProvider,
   chainId: 0,
   signer: "",
@@ -25,7 +26,8 @@ const appContext = createContext({
   shares: 0,
   role: Role.NONE,
   saleActive: false,
-  currentSupply: 0
+  currentSupply: 0,
+  tokenPrice: 0
 });
 
 export function useAppContext() {
@@ -48,6 +50,7 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
   const [role, setRole] = useState<Role>(Role.NONE);
   const [saleActive, setSaleActive] = useState<boolean>(false);
   const [currentSupply, setCurrentSupply] = useState<number>(0);
+  const [tokenPrice, setTokenPrice] = useState<number>(0);
 
   function updateProvider(provider: Provider) { setProvider(provider); }
 
@@ -69,12 +72,16 @@ export function AppContextProvider({ children }: AppContextProviderProps) {
 
   function updateCurrentSupply(currentSupply: number) { setCurrentSupply(currentSupply); }
 
+  function updateTokenPrice(tokenPrice: number) { setTokenPrice(tokenPrice); }
+
   return (
     <appContext.Provider value={{
       updateProvider, updateChainId, updateSigner, updateBalance, 
       updateDNABalance, updateShares, updateRole, updateSaleActive, 
-      updateAllowance, updateCurrentSupply,
-      provider, chainId, signer, balance, DNABalance, shares, role, saleActive, allowance, currentSupply}}>
+      updateAllowance, updateCurrentSupply, updateTokenPrice,
+      provider, chainId, signer, balance,
+      DNABalance, shares, role, saleActive, 
+      allowance, currentSupply, tokenPrice}}>
         {children}
     </appContext.Provider>
   );

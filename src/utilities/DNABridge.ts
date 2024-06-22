@@ -124,6 +124,19 @@ export async function readAllowance(){
   }
 }
 
+export async function readTokenPrice() {
+  if (token) {
+    try {
+      const tokenPrice = await token.tokenPrice();
+      return tokenPrice;
+
+    } catch (error: any) {
+      console.log("readOwner action: " + ErrorMessage.RD);
+      swalError(ErrorMessage.RD, Action.RD_DATA, error);
+    }
+  }
+}
+
 export async function buyDNAToken(amount: number) {
   if (token) {
     try {

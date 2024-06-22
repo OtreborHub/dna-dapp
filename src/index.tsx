@@ -17,7 +17,7 @@ const sepolia = {
 }
 
 const metadata = {
-  name: 'DnA DAO Administration',
+  name: 'DnA DAO Governance',
   description: 'DAO Administration website for DnA',
   url: 'https://localhost:3000',
   icons: ['https://avatars.mywebsite.com/']

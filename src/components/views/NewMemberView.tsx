@@ -74,7 +74,8 @@ export default function NewMemberView({ message }: NewMemberProps) {
 					buyType={Action.BUY_DNA}
 					handleSubmit={handleSubmit}
 					handleChange={handleChange}
-					currentSupply={appContext.currentSupply} />,
+					currentSupply={appContext.currentSupply}
+					tokenPrice={appContext.tokenPrice} />,
 				showConfirmButton: false,
 				showCloseButton: true,
 			})

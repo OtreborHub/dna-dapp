@@ -117,7 +117,7 @@ export function swalError(errorMessage: ErrorMessage, action?: Action, error?: a
             break;
 
         case ErrorMessage.EMPTY_TITLE:
-            title = "Titolo vuoto: scegli il titolo della tua proposta.";
+            title = "Titolo vuoto: scegli un titolo per la tua proposta.";
             break;
 
         case ErrorMessage.EMPTY_DESC:

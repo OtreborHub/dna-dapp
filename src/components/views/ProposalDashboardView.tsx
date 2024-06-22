@@ -54,7 +54,6 @@ export default function ProposalDashboardView() {
           text: "La richiesta di inserimento è avvenuta con successo!\n Per favore attendi l'elaborazione del nuova proposta.",
           icon: "success",
           confirmButtonColor: "#3085d6",
-          html: true
         });
       }
       setIsLoading(false);

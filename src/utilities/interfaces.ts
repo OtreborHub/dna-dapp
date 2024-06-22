@@ -25,6 +25,7 @@ interface BuyFormProps {
     handleChange: (amount: number, buyTipe: string) => number;
     DNABalance?: number;
     currentSupply?: number;
+    tokenPrice?: number;
 }
 
 interface DelegationFormProps {
