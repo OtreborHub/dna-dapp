@@ -9,13 +9,10 @@ export enum ErrorMessage {
     NOT_MEMBER="Il tuo portafoglio non appartiene al registro dei membri.]Acquista parte delle shares DnA ed inizia la tua avventura con noi!",
     APPROVE_ISTRUCTION="Per prima cosa approva una quantità di DNA Token che DNA Administration potrà usare per l'acquisto degli share,]successivamente puoi spenderli per acquistare Shares.",
     
-    ALREADY_VOTED="Already voted",
-
     //GENERIC ERRORS
     RD="Error reading contract data",
     TR="Transaction refused",
     IO="Input error",
-    FE="Firebase error",
 
     // Contract Messages
     IF="Insufficient funds",
@@ -24,17 +21,17 @@ export enum ErrorMessage {
     SENDER_NOT_OWNER="Sender must be the owner",
     SENDER_NOT_MEMBER="Sender must be a member",
     ADDRESS_NOT_MEMBER="Address not owned by a member",
-
+    SENDER_IS_OWNER="Sender can't be the owner",
     SALE_CLOSED="Sale is closed",
-
     SALE_ALREADY_DISABLED="Sale already disabled",
     SALE_ALREADY_ENABLED="Sale already enabled",
     EMPTY_TITLE="Empty title",
     EMPTY_DESC="Empty description",
     PROP_EXECUTED="Proposal already executed",
     NOT_ENOGHT_VOTES="Not enoght votes",
+    ALREADY_VOTED="Already voted",
     PROP_TRANSFER="Token transfer failed",
-    PROP_NOT_FUND="Proposal not fund"
+    PROP_NOT_FOUND="Proposal not fund"
 
 }
 
@@ -89,6 +86,13 @@ export function swalError(errorMessage: ErrorMessage, action?: Action, error?: a
                 text = "Verifica che il tuo saldo sia sufficiente, o rivedi la quantità di Shares inserite.";
             } else if (action && action === Action.BUY_DNA){
                 text = "Verifica che il tuo saldo sia sufficiente, o rivedi la quantità di wei inserita";
+            }
+            break;
+
+        case ErrorMessage.SENDER_IS_OWNER:
+            title = "Operazione non permessa";
+            if(action && action === Action.BUY_SHARES){
+                text = "L'Owner non può comprare DNA Shares!"
             }
             break;
 
