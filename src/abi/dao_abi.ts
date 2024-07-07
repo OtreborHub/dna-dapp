@@ -190,20 +190,6 @@ export const DNADAO_ABI =
 		"type": "function"
 	},
 	{
-		"inputs": [],
-		"name": "disableSale",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "enableSale",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
 		"inputs": [
 			{
 				"internalType": "address",
@@ -484,6 +470,19 @@ export const DNADAO_ABI =
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bool",
+				"name": "_saleEnabled",
+				"type": "bool"
+			}
+		],
+		"name": "setSaleState",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{

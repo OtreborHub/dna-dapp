@@ -31,8 +31,9 @@ export default function NewMemberView({ message }: NewMemberProps) {
 		if (success) {
 			Swal.fire({
 				icon: "success",
-				title: buyType === "Approva" ? "Richiesta di approvazione effettuata!" : "Richiesta di acquisto effettuata!",
-				text: "L'elaborazione della richiesta avverrà tra qualche secondo.\n\nPer OK Per continuare.",
+				title: buyType === Action.APPROVE_DNA ? "Richiesta di approvazione effettuata!" : "Richiesta di acquisto effettuata!",
+				text: buyType === Action.APPROVE_DNA ? "L'approvazione dei Token è in corso, ti preghiamo di attendere qualche istante che la transazione venga elaborata" : 
+					"L'elaborazione della richiesta avverrà tra qualche secondo.\n\nPer OK Per continuare.",
 				showCloseButton: true,
 				showConfirmButton: true,
 				confirmButtonColor: "#3085d6",
@@ -147,16 +148,18 @@ export default function NewMemberView({ message }: NewMemberProps) {
 				{transformMessage(message)[0]}
 				<br />
 				{transformMessage(message)[1]}
-
+				
 				<Button
 					onClick={buyDNA}
 					variant="contained"
 					color="primary"
+					disabled={message === ErrorMessage.WALLET_ERROR ? true : false}
 					style={{ width: "15%", borderRadius: "4rem", marginTop: "2rem" }}>
 					ACQUISTA DNA
 				</Button>
+				{ message !== ErrorMessage.WALLET_ERROR &&
 				<Typography fontSize={"small"}>Rimangono {appContext.currentSupply} DNA disponibili</Typography>
-
+				}
 				{message === ErrorMessage.NOT_MEMBER &&
 					<>
 						<br />

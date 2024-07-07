@@ -113,43 +113,23 @@ function addContractListeners(signer: string) {
 
 }
 
-//Modificare in enableSale
-export async function enableSale() {
+export async function updateSaleState(state: boolean) {
   if (dao) {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       const signerContract = new ethers.Contract(DNADAO_ADDRESS, DNADAO_ABI, signer);
 
-      await signerContract.enableSale();
+      await signerContract.setSaleState(state);
       return true;
 
     } catch (error: any) {
-      console.log("enableSale action: " + ErrorMessage.TR);
-      swalError(ErrorMessage.TR, Action.ENABLE_SALE, error);
+      console.log("updateSaleState action: " + ErrorMessage.TR);
+      swalError(ErrorMessage.TR, Action.UPDATE_SALE_STATE, error);
       return false;
     }
   }
 }
-
-export async function disableSale() {
-  if (dao) {
-    try {
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
-      const signerContract = new ethers.Contract(DNADAO_ADDRESS, DNADAO_ABI, signer);
-
-      await signerContract.disableSale();
-      return true;
-
-    } catch (error: any) {
-      console.log("disableSale action: " + ErrorMessage.TR);
-      swalError(ErrorMessage.TR, Action.DISABLE_SALE, error);
-      return false;
-    }
-  }
-}
-
 
 export async function buyShares(amount: number) {
   if (dao) {

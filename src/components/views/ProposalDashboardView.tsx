@@ -1,35 +1,50 @@
-import { Box, Button, Grid, Typography, useMediaQuery } from "@mui/material";
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import { Box, Button, Checkbox, FormControlLabel, FormGroup, Grid, Typography, useMediaQuery } from "@mui/material";
 import { useEffect, useState } from 'react';
 import Swal from "sweetalert2";
-// import { useAppContext } from '../../Context';
-import AddCircleIcon from '@mui/icons-material/AddCircle';
 import withReactContent from "sweetalert2-react-content";
-import { useAppContext } from "../../Context";
 import '../../styles/view.css';
 import { EMPTY_PROPOSAL, createProposal, executeProposal, readProposals, voteProposal } from "../../utilities/DAOBridge";
-import { Role } from "../../utilities/Role";
 import { Proposal } from "../../utilities/interfaces";
 import Loader from '../Loader';
 import ProposalCard from "../cards/ProposalCard";
 import NewProposalForm from "../forms/NewProposalForm";
+import { useAppContext } from '../../Context';
+import { Role } from '../../utilities/Role';
 
 export default function ProposalDashboardView() {
-  const isMobile = useMediaQuery('(max-width: 750px)');
+  const [proposalQuantity, setProposalQuantity] = useState<number>(0);
   const [activeProposals, setActiveProposals] = useState<Proposal[]>();
   const [executedProposals, setExecutedProposals] = useState<Proposal[]>();
+  const [trasfCheck, setTrasfCheck] = useState<boolean>(false);
+  const [approvedCheck, setApprovedCheck] = useState<boolean>(false);
+  const [rejectedCheck, setRejectedCheck] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const appContext = useAppContext();
   const MySwal = withReactContent(Swal);
+  const isMobile = useMediaQuery('(max-width: 750px)');
+  const appContext = useAppContext();
   
   useEffect(() => {
     getProposals();
-  }, [])
+  }, [trasfCheck, approvedCheck, rejectedCheck])
 
   async function getProposals(){
     try {
       const proposals = await readProposals();
-      const activeProposals =  proposals.filter(proposal => proposal.executed === false);
-      const executedProposals = proposals.filter(proposal => proposal.executed === true);
+      let activeProposals =  proposals.filter(proposal => proposal.executed === false);
+      let executedProposals = proposals.filter(proposal => proposal.executed === true);
+
+      if(trasfCheck){
+        activeProposals = activeProposals.filter(proposal => proposal.amount > 0)
+      }
+      if(approvedCheck){
+        executedProposals = executedProposals.filter(proposal => proposal.approved === true);
+      }
+      if(rejectedCheck){
+        executedProposals = executedProposals.filter(proposal => proposal.approved === false);
+      }
+      
+      setProposalQuantity(proposals.length);
       setActiveProposals(activeProposals);
       setExecutedProposals(executedProposals);
 
@@ -107,63 +122,84 @@ export default function ProposalDashboardView() {
     }
   }
 
+  const handleTrasfFilter = () => {
+    setTrasfCheck(!trasfCheck);
+  }
+
+  const handleApprovedFilter = () => {
+    setApprovedCheck(!approvedCheck);
+    if(rejectedCheck === true && approvedCheck === false){
+      setRejectedCheck(false);
+    }
+  }
+
+  const handleRejectedFilter = () => {
+    setRejectedCheck(!rejectedCheck);
+    if(approvedCheck === true && rejectedCheck === false){
+      setApprovedCheck(false);
+    }
+  }
+
+
   return (
     <>
-      { activeProposals && activeProposals.length === 0  && executedProposals && executedProposals.length === 0 &&
       <Box alignItems={"center"} textAlign={"center"} >
-      <Typography variant="h4" fontFamily={"sans-serif"} sx={{ cursor: 'default' }}> Nessuna proposta inserita </Typography>
         <Button
           type="submit"
           variant="contained"
           color="primary"
-          sx={{borderRadius: "10px"}}
+          sx={{borderRadius: "10px", marginBottom:"1rem"}}
           onClick={() => newProposal()}
+          disabled={ appContext.role === Role.OWNER}
           endIcon={<AddCircleIcon />}>
           <strong>NUOVA PROPOSTA </strong>
         </Button>
-      </Box>
+      { proposalQuantity === 0 &&
+      <Typography variant="body1" fontFamily={"sans-serif"} sx={{ cursor: 'default' }}> Nessuna proposta presente </Typography>
       }
-
-      {/* PROPOSTE ATTIVE */}
-      { activeProposals && activeProposals.length > 0 &&
-      <>
-      <Typography variant="h4" textAlign={"left"} marginLeft={"2rem"} fontFamily={"sans-serif"} sx={{ cursor: 'default' }}> Proposte da valutare </Typography>
-      <Box className="card-div" paddingBottom={"2rem"}>
-        <Grid container spacing={isMobile ? 4 : 2} sx={{ margin: "1rem" }}>
-          {activeProposals?.map(el =>
-            <Grid height={"100%"} item key={el.title} xs={6} md={4} xl={3}>
-              <ProposalCard
-                proposal={el}
-                handleVote={vote}
-                handleExecute={execute}
-              />
-            </Grid>
-            
-          )}
-          <Grid item sx={{ alignSelf: "center" }} xs={6} md={4} xl={3}>
-          { appContext.role === Role.MEMBER && 
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              sx={{borderRadius: "10px"}}
-              onClick={() => newProposal()}
-              endIcon={<AddCircleIcon />}>
-              <strong>NUOVA PROPOSTA </strong>
-            </Button>
-          }
-          </Grid>
-        </Grid>
       </Box>
-      </>
-      }
 
-      {/* PROPOSTE ESEGUITE */}
-      { executedProposals && executedProposals.length > 0 &&
+      { proposalQuantity > 0 &&
       <>
-        <Typography variant="h4" textAlign={"left"} marginLeft={"2rem"} fontFamily={"sans-serif"} sx={{ cursor: 'default' }}> Proposte eseguite</Typography>
+
+        {/* PROPOSTE ATTIVE */}
+        <Box display={"flex"} flexDirection={"row"} paddingBottom={"1rem"}>
+          <Typography variant="h4" textAlign={"left"} marginLeft={"2rem"} marginRight={"1rem"} fontFamily={"sans-serif"} sx={{ cursor: 'default' }}> Proposte da valutare </Typography>
+          <FormGroup sx={{ border: "0.2rem solid", borderRadius: "1rem", padding: "1rem", paddingTop: "0rem", paddingBottom: "0rem"}}>
+          <FormControlLabel control={<Checkbox  checked={trasfCheck} onChange={handleTrasfFilter}  />} label="con Trasferimento" />
+          </FormGroup>
+        </Box>
         
-        <Box className="card-div" paddingBottom={"2rem"}>
+        {activeProposals && activeProposals.length > 0 &&
+        <Box className="card-div" paddingBottom={"3rem"}>
+          <Grid container spacing={isMobile ? 4 : 2} sx={{ margin: "1rem" }}>
+            {activeProposals?.map(el =>
+              <Grid height={"100%"} item key={el.title} xs={6} md={4} xl={3}>
+                <ProposalCard
+                  proposal={el}
+                  handleVote={vote}
+                  handleExecute={execute}
+                />
+              </Grid>
+              
+            )}
+          </Grid>
+        </Box>
+        }
+        
+
+        {/* PROPOSTE ESEGUITE */}
+        <Box display={"flex"} flexDirection={"row"} paddingBottom={"1rem"}>
+          <Typography variant="h4" textAlign={"left"} marginLeft={"2rem"} marginRight={"1rem"} fontFamily={"sans-serif"} sx={{ cursor: 'default' }}> Proposte eseguite</Typography>
+          <FormGroup sx={{ border: "0.2rem solid", borderRadius: "1rem", padding: "1rem", paddingTop: "0rem", paddingBottom: "0rem"}} row>
+            <FormControlLabel control={<Checkbox  checked={approvedCheck} onChange={handleApprovedFilter}  />} label="approvate" />
+            <FormControlLabel control={<Checkbox  checked={rejectedCheck} onChange={handleRejectedFilter}  />} label="respinte" />
+          </FormGroup>
+        </Box>
+
+        
+        { executedProposals && executedProposals.length > 0 &&
+        <Box className="card-div" paddingBottom={"3rem"}>
           <Grid container spacing={isMobile ? 4 : 2} sx={{ margin: "1rem" }}>
             {executedProposals?.map(el =>
               <Grid item key={el.title} xs={6} md={4} xl={3}>
@@ -174,8 +210,11 @@ export default function ProposalDashboardView() {
             )}
           </Grid>
         </Box>
-      </>
-      }
+        }
+
+    </>
+    }
+
       <Loader loading={isLoading}/>
     </>
   );

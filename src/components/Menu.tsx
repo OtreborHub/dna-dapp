@@ -7,7 +7,7 @@ import { useState } from 'react';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { useAppContext } from '../Context';
-import { buyShares, delegateVote, disableSale, enableSale, revokeMemberDelegation } from '../utilities/DAOBridge';
+import { buyShares, delegateVote, updateSaleState, revokeMemberDelegation } from '../utilities/DAOBridge';
 import { approveDNAToken, buyDNAToken, updateTokenPrice, token } from '../utilities/DNABridge';
 import { ErrorMessage, swalError } from '../utilities/Error';
 import { Role } from '../utilities/Role';
@@ -23,38 +23,21 @@ export default function DropdownMenu({ connect: connectWallet }: NavbarProps) {
   const appContext = useAppContext();
   const MySwal = withReactContent(Swal);
 
-  async function endSharesSale(){
+  async function setSaleState(){
     try {
-      const success = await disableSale();
+      const success = await updateSaleState(!appContext.saleActive);
       if(success){
         Swal.fire({
-          title: "Richiesta di disabilitazione vendita Shares",
-          text: "La vendita degli Shares sarà disabilitata tra qualche secondo. Premi OK per continuare.",
+          title: appContext.saleActive ? "Richiesta di disabilitazione vendita Shares" : "Richiesta di abilitazione vendita Shares",
+          text: appContext.saleActive ? "La vendita degli Shares sarà disabilitata tra qualche secondo. Premi OK per continuare." : "La vendita degli Shares sarà disponibile tra qualche secondo. Premi OK per continuare.",
           icon: "success",
           confirmButtonColor: "#3085d6"
         })
       }
     } catch (error) {
-      console.log("Error during endSale action");
+      console.log("Error during setSaleState action");
     }
   }
-
-  async function activeSharesSale(){
-    try {
-      const success = await enableSale();
-      if(success){
-        Swal.fire({
-          title: "Richiesta di abilitazione vendita Shares",
-          text: "La vendita degli Shares sarà disponibile tra qualche secondo. Premi OK per continuare.",
-          icon: "success",
-          confirmButtonColor: "#3085d6"
-        })
-      }
-    } catch (error) {
-      console.log("Error during endSale action");
-    }
-  }
-
 
   function delegateVoteToMember() {
     MySwal.fire({
@@ -267,20 +250,9 @@ export default function DropdownMenu({ connect: connectWallet }: NavbarProps) {
 
         {appContext.role === Role.OWNER &&
           <Menu slots={{ listbox: Listbox }}>
-              {  appContext.saleActive &&
-                <>
-                <MenuItem> Vendita DNA Shares ATTIVA</MenuItem>
-                <MenuItem><hr/></MenuItem>
-                <MenuItem onClick={endSharesSale}>Termina vendita shares</MenuItem>
-                </>
-              }
-              {  !appContext.saleActive &&
-                <>
-                <MenuItem> Vendita DNA Shares DISATTIVATA </MenuItem>
-                <MenuItem><hr/></MenuItem>
-                <MenuItem onClick={activeSharesSale}>Attiva vendita shares</MenuItem>
-                </>
-              }
+              <MenuItem> {!appContext.saleActive ? "Vendita DNA Shares DISATTIVATA" : "Vendita DNA Shares ATTIVA" }</MenuItem>
+              <MenuItem><hr/></MenuItem>
+              <MenuItem onClick={setSaleState}>{!appContext.saleActive ? "Attiva vendita shares" : "Termina vendita shares" }</MenuItem>
               {
                 !appContext.saleActive &&
                 <MenuItem onClick={updateDNAPrice}>Aggiorna prezzo DNA Shares</MenuItem>

@@ -30,23 +30,18 @@ export default function App() {
     //Events
     window.ethereum.on('chainChanged', handleChanges);
     window.ethereum.on('accountsChanged', handleAccountChanges);
-  }, []);
+  }, [appContext.signer, appContext.chainId]);
 
   const handleChanges = () => {
     console.log(window.ethereum.chainId);
-    window.location.reload();
   };
 
   const handleAccountChanges = async (accounts:any) => {
     if (accounts.length === 0) {
       console.log('Please connect to Metamask.');
       disconnect();
-      window.location.reload();
-    } else if(appContext.signer !== "" && accounts.length > 1) {
-      window.location.reload();
     } else {
       await connectWallet();
-      window.location.reload();
     }
   };
 
@@ -155,7 +150,7 @@ export default function App() {
           className="bebas-regular" 
           variant="h2" 
           paddingTop={"3rem"} 
-          paddingBottom={"3rem"} 
+          paddingBottom={"2rem"} 
           textAlign={"center"}
           sx={{ cursor: 'default' }}>
           DnA DAO Governance

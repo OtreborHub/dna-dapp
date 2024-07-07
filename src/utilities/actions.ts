@@ -9,14 +9,12 @@ export enum Action {
 
   DELEGATE_MEMBER="Delega Membro",
   REVOKE_DELEGATE="Revoca delega",
-
-  ENABLE_SALE="Abilitazione vendita shares",
-  DISABLE_SALE="Disabilitazione vendita shares",
-
+  
   BUY_DNA="Acquisto DNA",
   APPROVE_DNA="Approva DNA",
   BUY_SHARES="Acquisto Shares",
-
+  
+  UPDATE_SALE_STATE="Modifica stato di vendita shares",
   UPDATE_PRICE="Aggiornamento prezzo"
 
 }
